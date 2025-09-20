@@ -12,7 +12,7 @@ import { HexColorPicker } from "react-colorful";
 import {
   Package,
   Tag,
-  Image,
+  Image as ImageIcon,
   Layers,
   Link2,
   DollarSign,
@@ -28,6 +28,7 @@ import {
   Sliders,
   Percent,
 } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 import DeliveryChargesForm from "@/app/(commonLayout)/components/ui/deliveryCharges";
 import SkeletonCard from "@/app/dashboard/components/SkeletonCard";
@@ -452,11 +453,14 @@ const AddProduct = () => {
           />
           <div className="flex flex-wrap gap-4 mt-4">
             {state.map((img, idx) => (
-              <img
+              <Image
                 key={idx}
                 src={img}
                 alt="Uploaded Preview"
+                width={96}
+                height={96}
                 className="w-24 h-24 object-cover rounded-md border"
+                unoptimized
               />
             ))}
           </div>

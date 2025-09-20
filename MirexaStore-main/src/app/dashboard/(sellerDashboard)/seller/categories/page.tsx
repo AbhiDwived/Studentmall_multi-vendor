@@ -5,6 +5,7 @@ import { toast } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import WithAuth from "@/app/lib/utils/withAuth";
+import Image from "next/image";
 
 interface Category {
   _id: string;
@@ -290,10 +291,12 @@ const CategoriesPage = () => {
               <div key={category._id} className="border rounded-lg p-4 hover:shadow-md transition">
                 <div className="w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden">
                   {category.bannerImage && (
-                    <img
+                    <Image
                       src={category.bannerImage}
                       alt={category.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   )}
                 </div>
