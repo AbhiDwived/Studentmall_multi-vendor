@@ -5,16 +5,21 @@ import ProductCart from "../components/ui/ProductCart";
 const Product = async () => {
   const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/product`;
 
-  const response = await fetch(apiUrl, {
-    next: { revalidate: 60 }, // ✅ Revalidate every 60 seconds
-  });
+  let products = [];
+  
+  try {
+    const response = await fetch(apiUrl, {
+      next: { revalidate: 60 }, // ✅ Revalidate every 60 seconds
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    if (response.ok) {
+      const responseData = await response.json();
+      products = responseData.data || [];
+    }
+  } catch (error) {
+    console.log('Failed to fetch products during build, using empty array');
+    products = [];
   }
-
-  const responseData = await response.json();
-  const products = responseData.data;
 
   // Filter for featured products
   const featuredProducts = products.filter(

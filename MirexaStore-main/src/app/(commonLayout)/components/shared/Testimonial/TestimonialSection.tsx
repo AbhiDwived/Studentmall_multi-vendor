@@ -13,33 +13,31 @@ const fetchInitialReviews = async (page: number = 1, limit: number = 6) => {
       { next: { revalidate: 60 } }
     );
     
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+    if (res.ok) {
+      const data = await res.json();
+      const reviews = data.data?.map((review: any) => ({
+        userName: review.userName || "Anonymous",
+        review: review.comment,
+        image: generateFallbackImage(review.userName),
+        rating: review.rating,
+        createdAt: new Date(review.createdAt).toLocaleDateString("en-US"),
+      })) || [];
+
+      return {
+        reviews,
+        totalReviews: data.totalReviews || 0,
+        totalPages: data.totalPages || 1,
+      };
     }
-    
-    const data = await res.json();
-
-    const reviews = data.data?.map((review: any) => ({
-      userName: review.userName || "Anonymous",
-      review: review.comment,
-      image: generateFallbackImage(review.userName),
-      rating: review.rating,
-      createdAt: new Date(review.createdAt).toLocaleDateString("en-US"),
-    })) || [];
-
-    return {
-      reviews,
-      totalReviews: data.totalReviews || 0,
-      totalPages: data.totalPages || 1,
-    };
   } catch (error) {
-    console.error('Failed to fetch reviews:', error);
-    return {
-      reviews: [],
-      totalReviews: 0,
-      totalPages: 1,
-    };
+    console.log('API not available during build, using fallback data');
   }
+  
+  return {
+    reviews: [],
+    totalReviews: 0,
+    totalPages: 1,
+  };
 };
 
 const generateFallbackImage = (userName: string) => {
