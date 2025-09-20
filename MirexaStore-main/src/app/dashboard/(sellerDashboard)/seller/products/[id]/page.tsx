@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import axios from "axios";
+import Image from "next/image";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import WithAuth from "@/app/lib/utils/withAuth";
@@ -255,15 +256,15 @@ const EditProductPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {getImageArray().map((url: string, index: number) => (
                   <div key={index} className="relative group">
-                    <img
+                    <Image
                       src={url.trim()}
                       alt={`Product ${index + 1}`}
+                      width={400}
+                      height={300}
                       className="w-full h-48 object-cover rounded-lg border shadow-sm"
-                      onError={(e) => {
+                      unoptimized
+                      onError={() => {
                         console.log('❌ Image failed to load:', url);
-                        const target = e.target as HTMLImageElement;
-                        // Try a placeholder image from a reliable source
-                        target.src = `https://via.placeholder.com/400x300/f7f7f7/999999?text=Product+Image+${index + 1}`;
                       }}
                       onLoad={() => {
                         console.log('✅ Image loaded successfully');

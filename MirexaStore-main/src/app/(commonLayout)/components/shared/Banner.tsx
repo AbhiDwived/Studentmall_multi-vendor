@@ -7,10 +7,12 @@ const Banner: React.FC = () => {
   return (
     <div className="relative bg-gray-900">
       {/* Background image */}
-      <img
+      <Image
         src="https://res.cloudinary.com/dwg8d0bfp/image/upload/v1746954223/arrangement-black-friday-shopping-carts-with-copy-space-23-2148667047_hlwc79.jpg"
         alt="Shopping Carts"
-        className="absolute inset-0 w-full h-full object-cover opacity-70"
+        fill
+        className="object-cover opacity-70"
+        unoptimized
       />
 
       {/* Overlay */}

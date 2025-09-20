@@ -54,7 +54,8 @@ const SellerOrders: React.FC = () => {
     }
 
     fetchOrders();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth?.user?.email]);
 
   const fetchOrders = async () => {
     try {
@@ -111,7 +112,7 @@ const SellerOrders: React.FC = () => {
         }
       );
       toast.success(`Order status updated to ${newStatus}`);
-      fetchOrders();
+      fetchOrdersRefresh();
     } catch (err) {
       toast.error("Failed to update order status. Please try again.");
     }
@@ -154,7 +155,7 @@ const SellerOrders: React.FC = () => {
                   autoClose: 10000,
                 });
 
-                fetchOrders();
+                fetchOrdersRefresh();
               } catch (err) {
                 toast.error("❌ Failed to cancel order. Please try again.");
               }

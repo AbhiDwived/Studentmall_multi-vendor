@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MoreVertical, Bell, Search, LogOut, Home } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { logoutUser } from "@/app/lib/redux/features/authSlice";
@@ -103,10 +104,12 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
               title="Profile"
             >
               {userImage ? (
-                <img
+                <Image
                   src={userImage}
                   alt="User avatar"
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 userName[0]
