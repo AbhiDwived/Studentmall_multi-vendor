@@ -5,13 +5,13 @@ import ClickSparkWrapper from "./components/reactbit/ClickSparkWrapper/ClickSpar
 
 export const metadata: Metadata = {
   title:
-    "MirexaStore | Best Online Shopping in Bangladesh – Fashion, Electronics & More",
+    "Studentmall | Best Online Shopping in Bangladesh – Fashion, Electronics & More",
   description:
-    "Buy top-quality electronics, fashion, home decor, and more online from MirexaStore. Trusted online shopping in Bangladesh with fast delivery, secure payment & great prices.",
+    "Buy top-quality electronics, fashion, home decor, and more online from Studentmall. Trusted online shopping in Bangladesh with fast delivery, secure payment & great prices.",
 
   keywords: [
     "online shopping Bangladesh",
-    "MirexaStore",
+    "Studentmall",
     "buy electronics online",
     "fashion store BD",
     "home essentials BD",
@@ -21,17 +21,17 @@ export const metadata: Metadata = {
   ],
 
   openGraph: {
-    title: "MirexaStore | Best Online Shopping in Bangladesh",
+    title: "Studentmall | Best Online Shopping in Bangladesh",
     description:
       "Shop at MirexaStore – Bangladesh’s most trusted destination for electronics, fashion, and daily essentials. Quality guaranteed. Fast shipping nationwide.",
-    url: process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "https://mirexastore.com",
-    siteName: "MirexaStore",
+    url: process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "https://studentmall.com",
+    siteName: "Studentmall",
     images: [
       {
         url: "https://res.cloudinary.com/dwg8d0bfp/image/upload/v1751225263/mirexastore_dksqoq.png", // ✅ Your provided logo
         width: 800,
         height: 800,
-        alt: "MirexaStore Logo – Online Shopping Bangladesh",
+        alt: "Studentmall Logo – Online Shopping Bangladesh",
       },
     ],
     type: "website",
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "MirexaStore | Trusted Online Store in Bangladesh",
+    title: "Studentmall | Trusted Online Store in Bangladesh",
     description:
       "Electronics, fashion, home & lifestyle – discover everything at MirexaStore. Fast shipping, easy checkout, and amazing deals await.",
     images: [
       "https://res.cloudinary.com/dwg8d0bfp/image/upload/v1751225263/mirexastore_dksqoq.png",
     ],
-    creator: "@mirexastore", // optional
+    creator: "@studentmall", // optional
   },
 };
 

@@ -114,7 +114,7 @@ const UserAnalytics = () => {
           labels: sortedKeys,
           datasets: [
             {
-              label: "Total Spend (৳)",
+              label: "Total Spend (₹)",
               data: sortedKeys.map((k) => selectedMap[k]),
               backgroundColor: "#10b981",
             },
@@ -156,7 +156,7 @@ const UserAnalytics = () => {
         <Card
           icon={<FaDollarSign />}
           title="Total Spend"
-          value={`৳ ${totalSpend}`}
+          value={`₹ ${totalSpend}`}
           color="text-blue-600"
         />
         <Card
@@ -234,7 +234,7 @@ const UserAnalytics = () => {
                 <tr key={i} className="border-t">
                   <td className="px-4 py-2">{order._id.slice(-6)}</td>
                   <td className="px-4 py-2">{order.status}</td>
-                  <td className="px-4 py-2">৳ {order.grandTotal}</td>
+                  <td className="px-4 py-2">₹ {order.grandTotal}</td>
                   <td className="px-4 py-2">
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>

@@ -35,10 +35,12 @@ export default function FilterableProductPage() {
 
   const [brands, setBrands] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
+  const [dynamicBrands, setDynamicBrands] = useState<any[]>([]);
 
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 999999]);
   const [showFeatured, setShowFeatured] = useState(false);
   const [showNewArrival, setShowNewArrival] = useState(false);
   const [onlyInStock, setOnlyInStock] = useState(false);
@@ -66,9 +68,20 @@ export default function FilterableProductPage() {
 
         setBrands([...new Set(list.map((p) => p.brand))]);
         setCategories([...new Set(list.map((p) => p.category))]);
+        
+        // Fetch dynamic categories and brands from API
+        await fetchDynamicCategories();
+        await fetchDynamicBrands();
 
+        console.log('Total products before filtering:', list.length);
+        
         list = list.filter((p) => {
-          const inBrand = selectedBrand ? p.brand === selectedBrand : true;
+          const inBrand = selectedBrand
+            ? dynamicBrands.some(brand => 
+                brand.slug === selectedBrand && 
+                (brand.name === p.brand || brand.slug === p.brand)
+              )
+            : true;
           const inPrice =
             (p.discountPrice || p.price) >= priceRange[0] &&
             (p.discountPrice || p.price) <= priceRange[1];
@@ -77,8 +90,36 @@ export default function FilterableProductPage() {
           const isNewArrivalMatch = showNewArrival ? p.isNewArrival : true;
           const isActive = p.status === "active";
           const inCategory = selectedCategory
-            ? p.category === selectedCategory
+            ? p.category.toLowerCase() === selectedCategory.toLowerCase() || 
+              dynamicCategories.some(cat => 
+                (cat.slug.toLowerCase() === selectedCategory.toLowerCase() && 
+                 (cat.name.toLowerCase() === p.category.toLowerCase() || 
+                  cat.slug.toLowerCase() === p.category.toLowerCase()))
+              )
             : true;
+
+          // Debug ProShot camera specifically
+          if (p.name.includes('ProShot')) {
+            console.log('ProShot Camera Debug:', {
+              name: p.name,
+              brand: p.brand,
+              category: p.category,
+              status: p.status,
+              price: p.price,
+              discountPrice: p.discountPrice,
+              stockQuantity: p.stockQuantity,
+              inBrand,
+              inPrice,
+              inStock,
+              isFeaturedMatch,
+              isNewArrivalMatch,
+              isActive,
+              inCategory,
+              priceRange,
+              selectedBrand,
+              selectedCategory
+            });
+          }
 
           return (
             inBrand &&
@@ -91,6 +132,7 @@ export default function FilterableProductPage() {
           );
         });
 
+        console.log('Total products after filtering:', list.length);
         setProducts(list);
       } catch (error) {
         console.error("Error fetching products: ", error);
@@ -110,6 +152,28 @@ export default function FilterableProductPage() {
     selectedCategory,
   ]);
 
+  const fetchDynamicCategories = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+      const data = await res.json();
+      setDynamicCategories(Array.isArray(data.data) ? data.data : []);
+    } catch (error) {
+      console.error("Failed to load categories", error);
+      setDynamicCategories([]);
+    }
+  };
+
+  const fetchDynamicBrands = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/brand`);
+      const data = await res.json();
+      setDynamicBrands(Array.isArray(data.data) ? data.data : []);
+    } catch (error) {
+      console.error("Failed to load brands", error);
+      setDynamicBrands([]);
+    }
+  };
+
   const displayed = products.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
@@ -120,7 +184,7 @@ export default function FilterableProductPage() {
 
   const resetFilters = () => {
     setSelectedBrand("");
-    setPriceRange([0, 10000]);
+    setPriceRange([0, 999999]);
     setShowFeatured(false);
     setShowNewArrival(false);
     setOnlyInStock(false);
@@ -143,18 +207,27 @@ export default function FilterableProductPage() {
 
       <div className="space-y-2">
         <p className="font-medium">Category</p>
-        {categories.map((cat) => (
-          <label key={cat} className="flex items-center gap-2">
+        {dynamicCategories.map((cat) => (
+          <label key={cat._id || cat.slug} className="flex items-center gap-2">
             <input
               type="radio"
               name="category"
-              value={cat}
-              checked={selectedCategory === cat}
+              value={cat.slug}
+              checked={selectedCategory === cat.slug}
               onChange={() =>
-                router.push(`/products?category=${encodeURIComponent(cat)}`)
+                router.push(`/products?category=${encodeURIComponent(cat.slug)}`)
               }
             />
-            {cat}
+            <div className="flex items-center gap-2">
+              {cat.bannerImage && (
+                <img 
+                  src={cat.bannerImage} 
+                  alt={cat.name}
+                  className="w-4 h-4 rounded object-cover"
+                />
+              )}
+              {cat.name}
+            </div>
           </label>
         ))}
         <label className="flex items-center gap-2">
@@ -169,20 +242,39 @@ export default function FilterableProductPage() {
         </label>
       </div>
 
-      <div>
-        <label className="block font-medium mb-1">Brand</label>
-        <select
-          value={selectedBrand}
-          onChange={(e) => setSelectedBrand(e.target.value)}
-          className="w-full p-2 border rounded"
-        >
-          <option value="">All Brands</option>
-          {brands.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+      <div className="space-y-2">
+        <p className="font-medium">Brand</p>
+        {dynamicBrands.map((brand) => (
+          <label key={brand._id || brand.slug} className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="brand"
+              value={brand.slug}
+              checked={selectedBrand === brand.slug}
+              onChange={() => setSelectedBrand(brand.slug)}
+            />
+            <div className="flex items-center gap-2">
+              {brand.logo && (
+                <img 
+                  src={brand.logo} 
+                  alt={brand.name}
+                  className="w-4 h-4 rounded object-cover"
+                />
+              )}
+              {brand.name}
+            </div>
+          </label>
+        ))}
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="brand"
+            value=""
+            checked={selectedBrand === ""}
+            onChange={() => setSelectedBrand("")}
+          />
+          All Brands
+        </label>
       </div>
 
       <div>
@@ -205,7 +297,7 @@ export default function FilterableProductPage() {
           <input
             type="number"
             min={priceRange[0]}
-            max={10000}
+            max={999999}
             value={priceRange[1]}
             onChange={(e) =>
               setPriceRange([

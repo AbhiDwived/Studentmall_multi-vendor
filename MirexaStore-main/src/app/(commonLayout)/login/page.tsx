@@ -178,21 +178,21 @@ const Login = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <button
             type="button"
-            onClick={() => handleDemoLogin("mirexastore@gmail.com", "12345")}
+            onClick={() => handleDemoLogin("studentmall@gmail.com", "12345")}
             className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
           >
             Login as User
           </button>
           <button
             type="button"
-            onClick={() => handleDemoLogin("mdeasinsarkar01@gmail.com", "123")}
+            onClick={() => handleDemoLogin("abhideivedi687@gmail.com", "Abhi@1432")}
             className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
           >
             Login as Seller
           </button>
           <button
             type="button"
-            onClick={() => handleDemoLogin("yeasin@gmail.com", "123")}
+            onClick={() => handleDemoLogin("mernstudy791@gmail.com", "Abhi@1432")}
             className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm"
           >
             Login as Admin

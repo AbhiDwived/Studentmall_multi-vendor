@@ -222,10 +222,10 @@ const OrderDetails: React.FC = () => {
 
             <div className="text-sm text-right md:text-left">
               <h3 className="text-lg font-semibold mb-2">Payment Summary:</h3>
-              <p>Subtotal: ৳{order.totalAmount.toFixed(2)}</p>
-              <p>Shipping: ৳{order.shippingCost.toFixed(2)}</p>
+              <p>Subtotal: ₹{order.totalAmount.toFixed(2)}</p>
+              <p>Shipping: ₹{order.shippingCost.toFixed(2)}</p>
               <p className="font-bold text-lg">
-                Total: ৳{order.totalPrice.toFixed(2)}
+                Total: ₹{order.totalPrice.toFixed(2)}
               </p>
             </div>
           </div>
@@ -261,10 +261,10 @@ const OrderDetails: React.FC = () => {
                     )}
                   </td>
                   <td className="p-2 border">{item.name}</td>
-                  <td className="p-2 border">৳{item.price.toFixed(2)}</td>
+                  <td className="p-2 border">₹{item.price.toFixed(2)}</td>
                   <td className="p-2 border">{item.quantity}</td>
                   <td className="p-2 border">
-                    ৳{(item.price * item.quantity).toFixed(2)}
+                    ₹{(item.price * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))}

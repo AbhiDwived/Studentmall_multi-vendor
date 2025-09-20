@@ -331,7 +331,7 @@ const SubscriptionSeller = () => {
 
                 {/* Price */}
                 <p className="text-2xl font-bold text-gray-900">
-                  ৳{plan.price.toFixed(2)}
+                  ₹{plan.price.toFixed(2)}
                 </p>
               </div>
 
@@ -392,10 +392,9 @@ const SubscriptionSeller = () => {
               ))}
             </ul>
             <p>
-              💡 <strong>নির্দেশনা:</strong> টাকা পাঠানোর পর{" "}
-              <u>Transaction ID</u> টি অবশ্যই দিন এবং একটি স্ক্রিনশট সংরক্ষণ করে
-              রাখুন। যতক্ষণ না পর্যন্ত আপনার রিকুয়েস্ট এপ্রুভ হয়, ততক্ষণ
-              স্ক্রিনশট টি সংরক্ষণ করুন।
+              💡 <strong>Note:</strong> After sending the money, make sure to
+              provide the <u>Transaction ID</u> and keep a screenshot saved.
+              Until your request is approved, ₹
             </p>
           </div>
 

@@ -293,7 +293,7 @@ const AdminOrders: React.FC = () => {
                         {new Date(order.orderDate).toLocaleDateString()}
                       </td>
                       <td className="py-3 px-4 text-center font-semibold">
-                        ৳{order.totalPrice.toFixed(2)}
+                        ₹{order.totalPrice.toFixed(2)}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span

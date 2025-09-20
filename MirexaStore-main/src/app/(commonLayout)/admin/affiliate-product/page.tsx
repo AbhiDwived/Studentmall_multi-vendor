@@ -185,7 +185,7 @@ const AffiliateProductsPage = () => {
                         {product.category}
                       </td>
                       <td className="px-3 sm:px-4 py-2 text-orange-600 font-semibold whitespace-nowrap">
-                        ৳ {product.price}
+                        ₹ {product.price}
                       </td>
                       <td className="px-3 sm:px-4 py-2 capitalize text-gray-700 whitespace-nowrap">
                         {product.type}

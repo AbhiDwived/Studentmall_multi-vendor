@@ -142,12 +142,7 @@ const SellerRequestPage = () => {
                 ⚠ Please <strong>log out and log back in</strong> to apply your
                 new seller permissions securely.
               </p>
-              <p className="text-orange-600 font-semibold">
-                ⚠ আপনার নতুন বিক্রেতা অনুমতিগুলো সঠিকভাবে ও নিরাপদভাবে প্রয়োগ
-                করতে, <br />
-                <strong>লগআউট করে পুনরায় লগইন করুন</strong> এবং তারপর প্রোফাইল
-                পূরণ করুন।
-              </p>
+
               <p className="text-sm text-red-500 italic">
                 This helps us keep your account secure and up to date.
               </p>

@@ -21,10 +21,14 @@ export default function CategoryPage() {
       setLoading(true);
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
         setCategories(Array.isArray(data.data) ? data.data : []);
       } catch (error) {
         console.error("Failed to load categories", error);
+        setCategories([]);
       } finally {
         setLoading(false);
       }

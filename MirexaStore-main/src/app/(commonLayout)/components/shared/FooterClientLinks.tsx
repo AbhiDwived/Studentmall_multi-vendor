@@ -74,7 +74,7 @@ const FooterClientLinks = () => {
               className="flex items-center gap-2 hover:underline"
             >
               <FileText className="w-4 h-4" />
-              Seller Guide / সেলার গাইড
+              Seller Guide
             </Link>
           </li>
           <li>
@@ -83,7 +83,7 @@ const FooterClientLinks = () => {
               className="flex items-center gap-2 hover:underline"
             >
               <CheckCircle className="w-4 h-4 " />
-              Why Become a Seller? / কেন সেলার হবেন?
+              Why Become a Seller?
             </Link>
           </li>
         </ul>
@@ -118,8 +118,8 @@ const FooterClientLinks = () => {
       </div>
       <div>
         <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
-        <p className="text-sm mb-2">📞 +8801405671742</p>
-        <p className="text-sm mb-4">✉️ mdeasinsarkar01@gmail.com</p>
+        <p className="text-sm mb-2">📞 +91 8433208146</p>
+        <p className="text-sm mb-4">✉️ abhidwivedi687@gmail.com</p>
 
         <SellerClientButton />
       </div>

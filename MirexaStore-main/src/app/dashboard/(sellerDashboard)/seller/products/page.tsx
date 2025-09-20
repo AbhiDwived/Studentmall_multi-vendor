@@ -20,7 +20,7 @@ const AdminProductPage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(""); // Track the selected category
   const [categories, setCategories] = useState<string[]>([]); // All categories
   const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(10000);
+  const [maxPrice, setMaxPrice] = useState<number>(999999);
   const [searchQuery, setSearchQuery] = useState<string>(""); // For searching by name
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null); // For storing product ID to delete
   const [isModalOpen, setIsModalOpen] = useState(false); // To track if the modal is open
@@ -54,6 +54,7 @@ const AdminProductPage = () => {
       } catch (error) {
         toast.error("Error fetching products!");
         console.error("Error fetching products:", error);
+        setLoading(false);
       }
     };
 
@@ -226,7 +227,14 @@ const AdminProductPage = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map((product) => (
+            {filteredProducts.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-8 px-4 text-center text-gray-500">
+                  No products found
+                </td>
+              </tr>
+            ) : (
+              filteredProducts.map((product) => (
               <tr key={product._id} className="border-b hover:bg-gray-50">
                 <td className="py-3 px-4 text-sm text-gray-800">
                   <Link
@@ -247,7 +255,7 @@ const AdminProductPage = () => {
                   </Link>
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
-                  ৳{product.price}
+                  ₹{product.price}
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
                   {product.category}
@@ -284,7 +292,8 @@ const AdminProductPage = () => {
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>

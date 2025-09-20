@@ -24,9 +24,9 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata: Metadata = {
-  title: "MirexaStore",
+  title: "Studentmall",
   description:
-    "Shop smart at MirexaStore – your all-in-one destination for tech gadgets, accessories, home essentials, and lifestyle products. Fast delivery, trusted service, and quality you can count on.",
+    "Shop smart at Studentmall – your all-in-one destination for tech gadgets, accessories, home essentials, and lifestyle products. Fast delivery, trusted service, and quality you can count on.",
   // next.js 13+ automatically injects OG & Twitter tags from metadata on each page
 };
 
@@ -36,7 +36,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en" data-theme="light" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#F85606" />

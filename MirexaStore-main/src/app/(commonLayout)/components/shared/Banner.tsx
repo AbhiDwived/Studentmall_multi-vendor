@@ -20,7 +20,7 @@ const Banner: React.FC = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center text-white">
         <h1 className="text-3xl sm:text-5xl font-bold mb-4">
           Smart Shopping Starts at{" "}
-          <span className="text-[#F6550C]">MirexaStore</span>
+          <span className="text-[#F39C12]">Studentmall</span>
         </h1>
         <p className="text-base sm:text-lg max-w-2xl mx-auto mb-8">
           Discover gadgets, gear, and everyday essentials — all in one trusted
@@ -29,7 +29,7 @@ const Banner: React.FC = () => {
         </p>
         <a
           href="/products"
-          className="inline-block bg-[#F6550C] hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition"
+          className="inline-block bg-[#F39C12] hover:bg-[#E67E22] text-white font-semibold px-6 py-3 rounded-lg transition"
         >
           <ShinyText
             text="Shop Now"

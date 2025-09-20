@@ -17,12 +17,23 @@ const AdminProductPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<string>(""); // Track the selected category
   const [categories, setCategories] = useState<string[]>([]); // All categories
+  const [allCategories, setAllCategories] = useState<any[]>([]); // Full category objects
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(10000);
   const [searchQuery, setSearchQuery] = useState<string>(""); // For searching by name
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null); // For storing product ID to delete
   const [isModalOpen, setIsModalOpen] = useState(false); // To track if the modal is open
   const router = useRouter();
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+      const data = await response.json();
+      setAllCategories(data.data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,6 +57,7 @@ const AdminProductPage = () => {
       }
     };
     fetchProducts();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -139,11 +151,194 @@ const AdminProductPage = () => {
     );
   }
 
+  const [newCategory, setNewCategory] = useState({ name: "", slug: "", bannerImage: "" });
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategory.name || !newCategory.slug) {
+      toast.error("Name and slug are required");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/category`,
+        newCategory,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      
+      if (response.status === 201 || response.status === 200) {
+        toast.success("Category created successfully!");
+        setNewCategory({ name: "", slug: "", bannerImage: "" });
+        setShowCategoryForm(false);
+        fetchCategories();
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to create category");
+      console.error("Error creating category:", error);
+    }
+  };
+
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  };
+
+  const createDefaultCategories = async () => {
+    const defaultCategories = [
+      { name: "Electronics", slug: "electronics", bannerImage: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=400" },
+      { name: "Wearables", slug: "wearables", bannerImage: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400" },
+      { name: "Audio", slug: "audio", bannerImage: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400" },
+      { name: "Accessories", slug: "accessories", bannerImage: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400" },
+      { name: "Bags", slug: "bags", bannerImage: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400" },
+      { name: "Cameras", slug: "cameras", bannerImage: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400" },
+      { name: "Home Appliances", slug: "home-appliances", bannerImage: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400" },
+      { name: "Kitchen Appliances", slug: "kitchen-appliances", bannerImage: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400" }
+    ];
+
+    try {
+      for (const category of defaultCategories) {
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/category`,
+          category,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+      }
+      toast.success("Default categories created successfully!");
+      fetchCategories();
+    } catch (error: any) {
+      toast.error("Some categories may already exist or failed to create");
+      console.error("Error creating default categories:", error);
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    if (!confirm("Are you sure you want to delete this category?")) return;
+    
+    try {
+      await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/category/${categoryId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Category deleted successfully!");
+      fetchCategories();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete category");
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-semibold mb-6 text-center">
-        Product Management
+        Product & Category Management
       </h1>
+
+      {/* Category Management Section */}
+      <div className="mb-8 bg-gray-50 p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Category Management</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowCategoryForm(!showCategoryForm)}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              {showCategoryForm ? "Cancel" : "Add Category"}
+            </button>
+            
+          </div>
+        </div>
+        
+        {showCategoryForm && (
+          <form onSubmit={handleCreateCategory} className="bg-white p-4 rounded-md shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Category Name</label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    setNewCategory({
+                      ...newCategory,
+                      name,
+                      slug: generateSlug(name)
+                    });
+                  }}
+                  className="w-full p-2 border rounded-md"
+                  placeholder="e.g., Electronics"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Slug</label>
+                <input
+                  type="text"
+                  value={newCategory.slug}
+                  onChange={(e) => setNewCategory({...newCategory, slug: e.target.value})}
+                  className="w-full p-2 border rounded-md"
+                  placeholder="e.g., electronics"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Image URL</label>
+                <input
+                  type="url"
+                  value={newCategory.bannerImage}
+                  onChange={(e) => setNewCategory({...newCategory, bannerImage: e.target.value})}
+                  className="w-full p-2 border rounded-md"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Create Category
+              </button>
+            </div>
+          </form>
+        )}
+        
+        {/* Existing Categories List */}
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-3">Existing Categories ({allCategories.length})</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {allCategories.map((category) => (
+              <div key={category._id} className="bg-white p-3 rounded border flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={category.bannerImage || "https://via.placeholder.com/40"} 
+                    alt={category.name}
+                    className="w-10 h-10 rounded object-cover"
+                  />
+                  <div>
+                    <p className="font-medium">{category.name}</p>
+                    <p className="text-sm text-gray-500">{category.slug}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => deleteCategory(category._id)}
+                  className="text-red-600 hover:text-red-800 px-2 py-1 text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Modal */}
       <ConfirmationModal

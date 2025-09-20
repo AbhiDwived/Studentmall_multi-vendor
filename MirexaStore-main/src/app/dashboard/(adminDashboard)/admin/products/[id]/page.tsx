@@ -17,14 +17,38 @@ const EditProductPage = () => {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
   const router = useRouter();
+
+  const addImageUrl = () => {
+    const url = prompt('Enter image URL:');
+    if (url && url.trim()) {
+      const currentImages = getImageArray();
+      const newImages = [...currentImages, url.trim()].join(', ');
+      setProduct((prev: any) => ({ ...prev, productImages: newImages }));
+      toast.success('Image added!');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const currentImages = getImageArray();
+    const newImages = currentImages.filter((_, i) => i !== index).join(', ');
+    setProduct((prev: any) => ({ ...prev, productImages: newImages }));
+  };
+
+  const getImageArray = () => {
+    if (!product?.productImages) return [];
+    return Array.isArray(product.productImages) 
+      ? product.productImages 
+      : product.productImages.split(', ').filter((url: string) => url.trim());
+  };
 
   useEffect(() => {
     if (id) {
       const fetchProduct = async () => {
         try {
           const response = await axios.get(
-            `https://api.mirexastore.com/api/product/details/${id}`
+            `${process.env.NEXT_PUBLIC_API_URL}/product/details/${id}`
           );
           setProduct(response.data.data);
           setLoading(false);
@@ -40,10 +64,10 @@ const EditProductPage = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
     setProduct((prevProduct: any) => ({
       ...prevProduct,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -62,6 +86,8 @@ const EditProductPage = () => {
       };
     });
   };
+
+
   const token = useSelector((state: RootState) => state.auth.token);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +100,7 @@ const EditProductPage = () => {
 
     try {
       await axios.put(
-        `https://api.mirexastore.com/api/product/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/product/${id}`,
         product,
         {
           headers: {
@@ -123,6 +149,7 @@ const EditProductPage = () => {
                 id: "productImages",
                 placeholder: "comma separated URLs",
               },
+
               { label: "Video URL", id: "videoUrl" },
               {
                 label: "Features",
@@ -205,6 +232,44 @@ const EditProductPage = () => {
                 rows={4}
               />
             </div>
+          </div>
+
+          {/* Image Management */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-800">Product Images</h2>
+              <button
+                type="button"
+                onClick={addImageUrl}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Add Image URL
+              </button>
+            </div>
+            
+            {getImageArray().length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {getImageArray().map((url: string, index: number) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Product ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg border"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y3ZjdmNyIvPjx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JbWFnZTwvdGV4dD48L3N2Zz4=';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Checkboxes */}

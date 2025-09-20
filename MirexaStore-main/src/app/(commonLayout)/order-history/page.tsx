@@ -303,7 +303,7 @@ const OrderHistory: React.FC = () => {
                 <p className="text-xl font-medium text-gray-700">
                   Total:{" "}
                   <span className="text-xl font-semibold">
-                    ৳{order.grandTotal}
+                    ₹{order.grandTotal}
                   </span>
                 </p>
               </div>
@@ -373,18 +373,18 @@ const OrderHistory: React.FC = () => {
                       <p className="text-sm text-gray-600 mt-2">
                         Qty: {item.quantity} | Price:{" "}
                         <span className="font-semibold">
-                          ৳{item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </span>{" "}
                         | shippingCost:{" "}
                         <span className="font-semibold">
-                          ৳{order.shippingCost.toFixed(2)}
+                          ₹{order.shippingCost.toFixed(2)}
                         </span>
                         {order.discountApplied ? (
                           <>
                             {" "}
                             | FirstOrderDiscount:{" "}
                             <span className="font-semibold">
-                              ৳{order.discountApplied.toFixed(2)}
+                              ₹{order.discountApplied.toFixed(2)}
                             </span>
                           </>
                         ) : null}

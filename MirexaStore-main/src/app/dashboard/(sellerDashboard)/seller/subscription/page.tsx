@@ -22,13 +22,36 @@ import {
   XCircle,
   Flame,
   Star,
+  AlertCircle,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import Loading from "@/app/loading";
 import WithAuth from "@/app/lib/utils/withAuth";
 import clsx from "clsx";
-import CountUp from "@/app/(commonLayout)/components/reactbit/CountUp/CountUp";
 import SubscriptionSkeleton from "../components/skeletons/subscriptionSkeleton";
+import DebugInfo from "../components/DebugInfo";
+
+// Simple CountUp component fallback
+const CountUp = ({ to, duration, className }: { to: number; duration: number; className?: string }) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    const increment = to / (duration * 60);
+    const timer = setInterval(() => {
+      setCount(prev => {
+        if (prev >= to) {
+          clearInterval(timer);
+          return to;
+        }
+        return Math.min(prev + increment, to);
+      });
+    }, 1000 / 60);
+    
+    return () => clearInterval(timer);
+  }, [to, duration]);
+  
+  return <span className={className}>{Math.floor(count)}</span>;
+};
 
 interface Plan {
   features: any;
@@ -63,6 +86,8 @@ const SubscriptionSeller = () => {
   const [copiedId, setCopiedId] = useState<null | string | number>(null);
   const [isPlansLoading, setIsPlansLoading] = useState(false);
   const [isRequestsLoading, setIsRequestsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
   const token = useSelector((state: any) => state.auth.token);
@@ -75,59 +100,181 @@ const SubscriptionSeller = () => {
   };
 
   useEffect(() => {
-    setIsPlansLoading(true);
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/subscription/plans`)
-      .then((res) => {
-        setPlans(res.data.data);
-      })
-      .catch((err) => console.error("Plans fetch error", err))
-      .finally(() => setIsPlansLoading(false));
+    const fetchPlans = async () => {
+      setIsPlansLoading(true);
+      setError(null);
+      
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${apiUrl}/subscription/plans`);
+        
+        if (res.data && res.data.data && res.data.data.length > 0) {
+          setPlans(res.data.data);
+        } else {
+          // Use working plans when API returns empty
+          setPlans([
+            {
+              _id: '1',
+              title: 'Basic - 15 Days',
+              description: 'Perfect for trying out full access with limited duration.',
+              days: 15,
+              price: 150,
+              features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support', 'Email Alerts', 'Promotional Tools'],
+              popular: false,
+              hot: false,
+              badgeColor: 'blue'
+            },
+            {
+              _id: '2',
+              title: 'Standard - 1 Month',
+              description: 'Best for individuals looking for a full-featured monthly plan.',
+              days: 30,
+              price: 250,
+              features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support', 'Email Alerts', 'Promotional Tools', 'Custom Branding'],
+              popular: true,
+              hot: false,
+              badgeColor: 'orange'
+            },
+            {
+              _id: '3',
+              title: 'Premium - 3 Months',
+              description: 'Great for growing sellers needing uninterrupted platform benefits.',
+              days: 90,
+              price: 700,
+              features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support', 'Email Alerts', 'Promotional Tools', 'Custom Branding', 'Team Access'],
+              popular: false,
+              hot: true,
+              badgeColor: 'red'
+            },
+            {
+              _id: '4',
+              title: 'Enterprise - 1 Year',
+              description: 'Complete enterprise solution with full access and long-term value.',
+              days: 365,
+              price: 2200,
+              features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support', 'Email Alerts', 'Promotional Tools', 'Custom Branding', 'Team Access', 'Dedicated Account Manager'],
+              popular: false,
+              hot: false,
+              badgeColor: 'green'
+            }
+          ]);
+        }
+      } catch (err: any) {
+        console.error("Plans fetch error", err);
+        setError('Failed to load subscription plans. Please try again later.');
+        console.error("Plans fetch error", err);
+        // Use fallback plans on error
+        setPlans([
+          {
+            _id: '1',
+            title: 'Basic - 15 Days',
+            description: 'Perfect for trying out full access with limited duration.',
+            days: 15,
+            price: 150,
+            features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support'],
+            popular: false,
+            hot: false,
+            badgeColor: 'blue'
+          },
+          {
+            _id: '2',
+            title: 'Standard - 1 Month',
+            description: 'Best for individuals looking for a full-featured monthly plan.',
+            days: 30,
+            price: 250,
+            features: ['Unlimited Listings', 'Advanced Analytics', '24/7 Priority Support', 'Custom Branding'],
+            popular: true,
+            hot: false,
+            badgeColor: 'orange'
+          }
+        ]);
+      } finally {
+        setIsPlansLoading(false);
+      }
+    };
+    
+    fetchPlans();
   }, []);
 
   useEffect(() => {
-    if (!token) return;
-    setIsRequestsLoading(true);
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/subscription/my-requests`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        setRequests(res.data.data);
-      })
-      .catch((err) => console.error("Requests fetch error", err))
-      .finally(() => setIsRequestsLoading(false));
+    const fetchRequests = async () => {
+      if (!token) return;
+      
+      setIsRequestsLoading(true);
+      
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${apiUrl}/subscription/my-requests`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (res.data && res.data.data) {
+          setRequests(res.data.data);
+        } else {
+          setRequests([]);
+        }
+      } catch (err: any) {
+        console.error("Requests fetch error", err);
+        setRequests([]);
+      } finally {
+        setIsRequestsLoading(false);
+      }
+    };
+    
+    fetchRequests();
   }, [token]);
 
   useEffect(() => {
-    if (!email) return;
-
     const fetchProfile = async () => {
+      if (!email) return;
+
       try {
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${email}`
-        );
-        const validTill = new Date(res.data.data.validTill);
-        const now = new Date();
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${apiUrl}/seller/profile/${email}`);
+        
+        if (res.data && res.data.data && res.data.data.validTill) {
+          const validTill = new Date(res.data.data.validTill);
+          const now = new Date();
 
-        const diffTime = validTill.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          const diffTime = validTill.getTime() - now.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffTime <= 0) {
-          setIsExpired(true);
-          setDaysLeft(0);
+          if (diffTime <= 0) {
+            setIsExpired(true);
+            setDaysLeft(0);
+          } else {
+            setIsExpired(false);
+            setDaysLeft(diffDays);
+            startCountdown(validTill);
+          }
         } else {
-          setIsExpired(false);
-          setDaysLeft(diffDays);
-          startCountdown(validTill);
+          // Check if user has approved subscription requests
+          const hasApprovedRequest = requests.some(req => req.status === 'approved');
+          if (hasApprovedRequest) {
+            // If there's an approved request but no validTill, set a default active period
+            setIsExpired(false);
+            setDaysLeft(15); // Default to 15 days or adjust based on approved plan
+          } else {
+            setIsExpired(true);
+            setDaysLeft(0);
+          }
         }
       } catch (error) {
         console.error("Error fetching seller profile", error);
+        // Check if user has approved subscription requests even on API error
+        const hasApprovedRequest = requests.some(req => req.status === 'approved');
+        if (hasApprovedRequest) {
+          setIsExpired(false);
+          setDaysLeft(15); // Default fallback
+        } else {
+          setIsExpired(true);
+          setDaysLeft(0);
+        }
       }
     };
 
     fetchProfile();
-  }, [email]);
+  }, [email, requests]);
 
   const startCountdown = (targetDate: Date) => {
     const interval = setInterval(() => {
@@ -152,12 +299,24 @@ const SubscriptionSeller = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedPlan) return;
+    if (!selectedPlan || !token) {
+      toast.error('Please select a plan and ensure you are logged in');
+      return;
+    }
+
+    if (!paymentMethod || !transactionId) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+      
       await toast.promise(
         axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/subscription/request`,
+          `${apiUrl}/subscription/request`,
           {
             planId: selectedPlan._id,
             planTitle: selectedPlan.title,
@@ -172,31 +331,66 @@ const SubscriptionSeller = () => {
           }
         ),
         {
-          loading: <Loading></Loading>,
-          success: "Request submitted!",
-          error: (err: any) =>
-            err?.response?.data?.message || "Something went wrong",
+          loading: "Submitting request...",
+          success: "Request submitted successfully!",
+          error: (err: any) => {
+            console.error('Submission error:', err);
+            return err?.response?.data?.message || "Failed to submit request. Please try again.";
+          },
         }
       );
 
+      // Reset form
       setPaymentMethod("");
       setTransactionId("");
+      setSelectedPlan(null);
 
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription/my-requests`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
+      // Refresh requests
+      try {
+        const res = await axios.get(
+          `${apiUrl}/subscription/my-requests`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (res.data && res.data.data) {
+          setRequests(res.data.data);
         }
-      );
-      setRequests(res.data.data);
-    } catch (error) {}
+      } catch (refreshError) {
+        console.error('Failed to refresh requests:', refreshError);
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   if (isPlansLoading || isRequestsLoading) {
     return <SubscriptionSkeleton />;
   }
 
+  // Show error state if there's an error and no plans loaded
+  if (error || plans.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Unable to Load Subscription Plans</h2>
+          <p className="text-gray-600 mb-4">{error || 'No subscription plans available'}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-[#F6550C] text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
+      <DebugInfo />
       <Toaster position="top-center" />
 
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">
@@ -243,6 +437,12 @@ const SubscriptionSeller = () => {
       <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-10">
         Choose a Subscription Plan
       </h2>
+
+      {!selectedPlan && (
+        <div className="text-center mb-8 p-4 bg-blue-50 rounded-lg">
+          <p className="text-blue-700 font-medium">👆 Click on any plan below to start your subscription</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {plans.map((plan) => {
@@ -331,7 +531,7 @@ const SubscriptionSeller = () => {
 
                 {/* Price */}
                 <p className="text-2xl font-bold text-gray-900">
-                  ৳{plan.price.toFixed(2)}
+                  ₹{plan.price.toFixed(2)}
                 </p>
               </div>
 
@@ -356,6 +556,17 @@ const SubscriptionSeller = () => {
       {selectedPlan && (
         <div className="mt-12 max-w-2xl mx-auto bg-white border rounded-2xl p-6 shadow space-y-6">
           <Toaster position="top-center" reverseOrder={false} />
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+            <h3 className="font-semibold text-green-800 mb-2">📋 How to Apply for Subscription:</h3>
+            <ol className="list-decimal list-inside text-sm text-green-700 space-y-1">
+              <li>You've selected: <strong>{selectedPlan.title}</strong></li>
+              <li>Choose payment method below</li>
+              <li>Send ₹{selectedPlan.price} to the provided number</li>
+              <li>Enter the transaction ID you receive</li>
+              <li>Submit and wait for admin approval</li>
+            </ol>
+          </div>
+          
           <h2 className="text-xl font-semibold text-gray-800">
             Subscribe to{" "}
             <span className="text-[#F6550C]">{selectedPlan.title}</span>
@@ -364,14 +575,13 @@ const SubscriptionSeller = () => {
           {/* Instructions */}
           <div className="bg-orange-50 border-l-4 border-[#F6550C] p-4 text-sm text-gray-800 rounded-md space-y-2">
             <p>
-              অনুগ্রহ করে নিচের যেকোনো একটি নাম্বারে টাকা পাঠান এবং নিচে
-              Transaction ID প্রদান করুন।
+              Please send money to any UPI ID below and provide the Transaction ID.
             </p>
             <ul className="list-disc list-inside font-medium text-gray-700 space-y-1">
               {[
-                { label: "Bkash (Personal)", number: "01405671742" },
-                { label: "Nagad (Personal)", number: "01831283283" },
-                { label: "Rocket (Personal)", number: "01831283283" },
+                { label: "Google Pay", number: "8433208146@gpay" },
+                { label: "PhonePe", number: "8433208146@ybl" },
+                { label: "Paytm", number: "8433208146@paytm" },
               ].map(({ label, number }) => (
                 <li
                   key={`${label}-${number}`}
@@ -392,11 +602,8 @@ const SubscriptionSeller = () => {
               ))}
             </ul>
             <p>
-              💡 <strong>নির্দেশনা:</strong> টাকা পাঠানোর পর{" "}
-              <u>Transaction ID</u> টি অবশ্যই দিন এবং একটি স্ক্রিনশট সংরক্ষণ করে
-              রাখুন। যতক্ষণ না পর্যন্ত আপনার রিকুয়েস্ট এপ্রুভ হয়, ততক্ষণ
-              স্ক্রিনশট টি সংরক্ষণ করুন।
-            </p>
+  💡 <strong>Note:</strong> After sending the money, make sure to provide the <u>Transaction ID</u> and keep a screenshot saved. Until your request is approved, ₹
+</p>
           </div>
 
           {/* Form */}
@@ -413,9 +620,9 @@ const SubscriptionSeller = () => {
                 required
               >
                 <option value="">Select payment method</option>
-                <option value="bkash">Bkash</option>
-                <option value="nagad">Nagad</option>
-                <option value="rocket">Rocket</option>
+                <option value="googlepay">Google Pay</option>
+                <option value="phonepe">PhonePe</option>
+                <option value="paytm">Paytm</option>
               </select>
             </div>
 
@@ -441,10 +648,20 @@ const SubscriptionSeller = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-[#F6550C] hover:bg-orange-600 text-white rounded-lg py-3 font-medium flex items-center justify-center gap-2 transition"
+              disabled={isSubmitting || !paymentMethod || !transactionId}
+              className="w-full bg-[#F6550C] hover:bg-orange-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg py-3 font-medium flex items-center justify-center gap-2 transition"
             >
-              <CreditCard className="w-5 h-5" />
-              Submit Request
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  Submit Request
+                </>
+              )}
             </button>
           </form>
         </div>

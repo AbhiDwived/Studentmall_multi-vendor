@@ -23,17 +23,13 @@ import {
 const Navbar = () => {
   return (
     <ClickSparkWrapper>
-      <header className="bg-[#F6550C] shadow-lg">
+      <header className="bg-[#0A3D62] shadow-lg">
         <div className="container mx-auto flex items-center justify-between px-3 py-2 lg:py-3">
           <Link href="/" className="flex items-center min-w-[140px]">
-            <Image
-              src="/favicon.ico"
-              alt="MirexaStore Logo"
-              width={140}
-              height={45}
-              className="h-[42px] w-auto object-contain"
-              priority
-            />
+            <div className="text-white font-bold text-3xl tracking-wide">
+              <span className="text-[#F39C12]">Student</span>
+              <span className="text-white">Mall</span>
+            </div>
           </Link>
 
           <nav className="hidden lg:flex gap-6 text-sm items-center text-white font-semibold">
@@ -115,10 +111,10 @@ const Navbar = () => {
                 className="absolute top-full left-0 mt-2 w-56 bg-white rounded-md border border-gray-200 shadow-lg opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 invisible group-hover:visible transition-all duration-300 ease-in-out z-50 p-4"
                 role="menu"
               >
-                <h3 className="text-lg font-semibold mb-4 text-gray-900 select-none">
+                <h3 className="text-lg font-semibold mb-4 text-[#0A3D62] select-none">
                   Customer Service
                 </h3>
-                <ul className="space-y-3 text-base text-gray-800">
+                <ul className="space-y-3 text-base text-[#4B4B4B]">
                   {[
                     { href: "/contact", icon: Contact, label: "Contact Us" },
                     { href: "/faq", icon: HelpCircle, label: "FAQs" },
@@ -136,21 +132,21 @@ const Navbar = () => {
                     {
                       href: "/seller-guide",
                       icon: FileText,
-                      label: "Seller Guide / সেলার গাইড",
+                      label: "Seller Guide",
                     },
                     {
                       href: "/seller-benefits",
                       icon: CheckCircle,
-                      label: "Why Become a Seller? / কেন সেলার হবেন?",
+                      label: "Why Become a Seller?",
                     },
                   ].map(({ href, icon: Icon, label }) => (
                     <li key={href}>
                       <Link
                         href={href}
-                        className="flex items-center gap-3 text-gray-700 hover:text-[#F6550C] hover:underline transition-colors duration-200"
+                        className="flex items-center gap-3 text-[#4B4B4B] hover:text-[#F39C12] hover:underline transition-colors duration-200"
                         role="menuitem"
                       >
-                        <Icon className="w-5 h-5 flex-shrink-0 text-[#F6550C]" />
+                        <Icon className="w-5 h-5 flex-shrink-0 text-[#F39C12]" />
                         {label}
                       </Link>
                     </li>

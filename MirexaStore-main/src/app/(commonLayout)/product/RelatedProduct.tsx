@@ -98,15 +98,15 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
                   {product.discountPrice ? (
                     <>
                       <span className="text-[#F85606] font-bold">
-                        ৳{product.discountPrice}
+                        ₹{product.discountPrice}
                       </span>
                       <span className="line-through text-gray-400 text-xs">
-                        ৳{product.price}
+                        ₹{product.price}
                       </span>
                     </>
                   ) : (
                     <span className="text-[#F85606] font-bold">
-                      ৳{product.price}
+                      ₹{product.price}
                     </span>
                   )}
                 </div>

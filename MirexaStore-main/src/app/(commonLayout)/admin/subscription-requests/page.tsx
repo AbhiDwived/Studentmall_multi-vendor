@@ -113,7 +113,7 @@ function SubscriptionRequestsPage() {
                   <h3 className="text-lg font-semibold text-gray-800">
                     {req.planTitle} —{" "}
                     <span className="text-orange-600 font-bold">
-                      ৳{req.price}
+                      ₹{req.price}
                     </span>
                   </h3>
                   <p className="text-sm text-gray-700">

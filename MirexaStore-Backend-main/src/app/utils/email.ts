@@ -38,7 +38,7 @@ export const sendOrderConfirmationEmail = async ({
         <td style="padding: 8px; border: 1px solid #ddd;">${item.color}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${item.size}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${item.quantity}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">৳${item.price ? item.price.toFixed(2) : '0.00'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">₹${item.price ? item.price.toFixed(2) : '0.00'}</td>
       </tr>
     `
       )
@@ -48,10 +48,10 @@ export const sendOrderConfirmationEmail = async ({
 
   // ✅ Shared Payment Summary
   const paymentSummary = `
-    <p>Subtotal: ৳${totalAmount.toFixed(2)}</p>
-    <p>Shipping Cost: ৳${shippingCost.toFixed(2)}</p>
-    <p>Discount Applied: ৳${discountApplied.toFixed(2)}</p>
-    <p><strong>Total Amount to be Paid (After Discount): ৳${totalPrice.toFixed(2)}</strong></p>
+    <p>Subtotal: ₹${totalAmount.toFixed(2)}</p>
+    <p>Shipping Cost: ₹${shippingCost.toFixed(2)}</p>
+    <p>Discount Applied: ₹${discountApplied.toFixed(2)}</p>
+    <p><strong>Total Amount to be Paid (After Discount): ₹${totalPrice.toFixed(2)}</strong></p>
   `;
 
   // ✅ User Email HTML
@@ -201,7 +201,7 @@ export const sendOrderStatusConfirmationEmail = async ({
         <td style="padding: 8px; border: 1px solid #ddd;">${item.color}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${item.size}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${item.quantity}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">৳${item.price ? item.price.toFixed(2) : '0.00'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">₹${item.price ? item.price.toFixed(2) : '0.00'}</td>
       </tr>
     `
       )
@@ -211,10 +211,10 @@ export const sendOrderStatusConfirmationEmail = async ({
 
   // ✅ Shared Payment Summary
   const paymentSummary = `
-    <p>Subtotal: ৳${totalAmount.toFixed(2)}</p>
-    <p>Shipping Cost: ৳${shippingCost.toFixed(2)}</p>
-    <p>Discount Applied: ৳${discountApplied.toFixed(2)}</p>
-    <p><strong>Total Amount to be Paid (After Discount): ৳${totalPrice.toFixed(2)}</strong></p>
+    <p>Subtotal: ₹${totalAmount.toFixed(2)}</p>
+    <p>Shipping Cost: ₹${shippingCost.toFixed(2)}</p>
+    <p>Discount Applied: ₹${discountApplied.toFixed(2)}</p>
+    <p><strong>Total Amount to be Paid (After Discount): ₹${totalPrice.toFixed(2)}</strong></p>
   `;
 
   const shipmentEmailHtml = `

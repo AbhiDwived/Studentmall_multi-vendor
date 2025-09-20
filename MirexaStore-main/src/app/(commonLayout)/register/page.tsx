@@ -41,7 +41,11 @@ const Register = () => {
         router.push("/login");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong");
+      if (err.response?.status === 409) {
+        setError("Email already exists. Please use a different email or login.");
+      } else {
+        setError(err.response?.data?.message || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

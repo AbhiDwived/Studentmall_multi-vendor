@@ -126,7 +126,7 @@ const InactiveDraftProductPage = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 text-gray-800 font-medium">
-                    ৳{product.price}
+                    ₹{product.price}
                   </td>
                   <td className="px-6 py-4 text-gray-800">
                     {product.category}

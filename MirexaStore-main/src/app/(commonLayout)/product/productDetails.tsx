@@ -615,7 +615,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center gap-6">
                     <span className="text-2xl font-semibold text-orange-600 transition-all duration-300 ease-in-out">
-                      ৳{" "}
+                      ₹{" "}
                       {variantPrice !== null
                         ? variantPrice
                         : product.data.discountPrice ?? product.data.price}
@@ -624,7 +624,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                     {/* মূল দাম দেখাও যদি discount price থাকে */}
                     {variantPrice === null && product.data.discountPrice && (
                       <span className="text-lg text-gray-500 line-through transition-all duration-300 ease-in-out">
-                        ৳ {product.data.price}
+                        ₹ {product.data.price}
                       </span>
                     )}
 

@@ -830,7 +830,7 @@ const CheckoutPage = () => {
 
                         <div className="text-right">
                           <p className="font-medium text-gray-700">
-                            {item.quantity} x ৳{item.price}
+                            {item.quantity} x ₹{item.price}
                           </p>
                         </div>
 
@@ -894,7 +894,7 @@ const CheckoutPage = () => {
                       <p className="text-sm text-gray-800 mb-2 leading-6">
                         📲 অনুগ্রহ করে মোট{" "}
                         <span className="font-semibold text-pink-600">
-                          ৳{(totalAmount + shippingCost).toFixed(2)}
+                          ₹{(totalAmount + shippingCost).toFixed(2)}
                         </span>{" "}
                         নিচের বিকাশ নম্বরে{" "}
                         <span className="font-medium">Send Money</span> করুন।
@@ -950,7 +950,7 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total / মোট</span>
-                    <span>৳{(totalAmount + shippingCost).toFixed(2)}</span>
+                    <span>₹{(totalAmount + shippingCost).toFixed(2)}</span>
                   </div>
                 </div>
 

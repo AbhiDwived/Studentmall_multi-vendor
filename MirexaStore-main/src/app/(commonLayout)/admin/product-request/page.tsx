@@ -186,11 +186,11 @@ const ProductRequest = () => {
               <p className="text-sm">
                 <span className="font-medium text-gray-800">Price:</span>{" "}
                 <span className="text-[#F6550C] font-semibold">
-                  ৳{product.discountPrice || product.price}
+                  ₹{product.discountPrice || product.price}
                 </span>{" "}
                 {product.discountPrice && (
                   <span className="line-through ml-2 text-gray-400">
-                    ৳{product.price}
+                    ₹{product.price}
                   </span>
                 )}
               </p>

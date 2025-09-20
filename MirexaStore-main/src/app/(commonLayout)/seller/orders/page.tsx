@@ -411,7 +411,7 @@ const SellerOrders: React.FC = () => {
 
                   {/* Total */}
                   <td className="py-3 px-4 text-center font-semibold">
-                    ৳{order.totalPrice.toFixed(2)}
+                    ₹{order.totalPrice.toFixed(2)}
                   </td>
 
                   {/* Status */}

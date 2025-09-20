@@ -131,7 +131,7 @@ const AdminAnalytics = () => {
           labels: sellerLabels,
           datasets: [
             {
-              label: "Sales by Seller (৳)",
+              label: "Sales by Seller (₹)",
               data: sellerData,
               backgroundColor: "#F97316",
             },
@@ -179,7 +179,7 @@ const AdminAnalytics = () => {
         <Card
           icon={<FaDollarSign />}
           title="Total Sales"
-          value={`৳ ${totalSales}`}
+          value={`₹ ${totalSales}`}
           color="text-blue-600"
         />
         <Card

@@ -9,7 +9,7 @@ const BannerContent = () => {
     <div className="relative z-10 max-w-7xl mx-auto text-center">
       <h1 className="mb-3 sm:mb-4">
         <SplitText
-          text="Welcome to MirexaStore"
+          text="Welcome to Studentmall"
           className="text-2xl sm:text-4xl lg:text-7xl font-extrabold leading-tight mb-4 sm:mb-6 text-white text-center"
           delay={100}
           animationFrom={{

@@ -86,7 +86,7 @@ A full-featured, modern e-commerce platform with **role-based access control**, 
 
 ---
 
-**Live Demo**| [Visit App](https://api.mirexastore.com) |
+**Live Demo**| [Visit App](https://api.studentmall.com) |
 
 ---
 
@@ -107,7 +107,7 @@ Want to contribute? PRs are welcome! Please fork the repo, make changes, and sub
 
 ## 📬 Contact
 
-- 📧 Email: [mdeasinsarkar01@gmail.com](mailto:mdeasinsarkar01@gmail.com)
+- 📧 Email: [abhidwivedi687@gmail.com](mailto:abhidwivedi687@gmail.com)
 - 🌐 LinkedIn: [LinkedIn](https://www.linkedin.com/in/md-yeasin-ys-a71388278/)
 
 ---

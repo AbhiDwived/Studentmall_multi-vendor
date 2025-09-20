@@ -250,7 +250,7 @@ const AdminProductPage = () => {
                   </Link>
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
-                  ৳{product.price}
+                  ₹{product.price}
                 </td>
                 <td className="py-3 px-4 text-sm text-gray-800">
                   {product.category}

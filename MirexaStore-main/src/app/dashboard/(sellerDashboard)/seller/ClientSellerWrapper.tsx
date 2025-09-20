@@ -12,22 +12,40 @@ export default function ClientSellerWrapper({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isClient, setIsClient] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const role = useSelector((state: any) => state.auth?.user?.role);
 
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (isClient && role && role !== "seller") {
+    if (mounted && role && role !== "seller") {
       router.replace("/unauthorized");
     }
-  }, [isClient, role, router]);
+  }, [mounted, role, router]);
 
-  if (!isClient || !role) return null;
+  if (!mounted) {
+    return null;
+  }
+
+  if (!role) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">Please log in to access this page.</p>
+          <button 
+            onClick={() => router.push('/login')}
+            className="mt-4 bg-[#F6550C] text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen min-w-0">

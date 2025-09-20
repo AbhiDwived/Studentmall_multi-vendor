@@ -1,0 +1,82 @@
+[
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918433" },
+    "name": "TechSound",
+    "slug": "techsound",
+    "logo": "https://i1.sndcdn.com/avatars-CZvhrE6hOCUVC3wj-PCUp3A-t240x240.jpg",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918434" },
+    "name": "SoundBlast",
+    "slug": "soundblast",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQv7cxi3_GpBtF7Z2Y5mIkQuBoVZ8n-Z6Q85g&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918435" },
+    "name": "FitLife",
+    "slug": "fitlife",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS0A7rhYp-t6dk7J2eyQkGUfhLtDhz98iJ2bg&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918436" },
+    "name": "ClickPro",
+    "slug": "clickpro",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYu-HM6zbbUQfAZdXECY09zZ7B1Yh4TbxiGQ&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918437" },
+    "name": "UrbanGear",
+    "slug": "urbangear",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLITcE1hfZynR2PgGqL_hh38S5vKwXcjo5Ug&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918438" },
+    "name": "ProShot",
+    "slug": "proshot",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQi5cz0_Mv2kIoevEhKKu-0zM5dAiwtwkOPQQ&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918439" },
+    "name": "VisionPlus",
+    "slug": "visionplus",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQx5o4KpgT_1ZC-8K6cJ_yROxCeuYnzFr2lpg&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "68cefd6c57f7777262918440" },
+    "name": "FreshAir",
+    "slug": "freshair",
+    "logo": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQixD2TvUAdV82qgd_BaCXkTwNDWumU5M9xJA&s",
+    "status": "active",
+    "createdAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "updatedAt": { "$date": "2025-09-21T00:00:00.000Z" },
+    "__v": 0
+  }
+]

@@ -10,7 +10,9 @@ const categorySchema = new Schema<TCategory>(
 		bannerImage: { type: String },
 		description: { type: String },
 		isFeatured: { type: Boolean, default: false },
-		status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+		status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+		createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+		updatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
 	},
 	{ timestamps: true }
 );

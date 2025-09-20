@@ -176,10 +176,10 @@ const SellerAnalytics = () => {
             {
               label:
                 filter === "daily"
-                  ? "Daily Sales (৳)"
+                  ? "Daily Sales (₹)"
                   : filter === "weekly"
-                  ? "Weekly Sales (৳)"
-                  : "Monthly Sales (৳)",
+                  ? "Weekly Sales (₹)"
+                  : "Monthly Sales (₹)",
               data: sortedKeys.map((k) => selectedMap[k]),
               backgroundColor: "#F97316",
             },
@@ -247,7 +247,7 @@ const SellerAnalytics = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-        Seller Analytics Dashboard
+       Seller Analytics Dashboard
       </h1>
 
       {/* Summary Cards */}
@@ -257,7 +257,7 @@ const SellerAnalytics = () => {
           title="Total Sales"
           value={
             <span className="text-blue-600">
-              ৳{" "}
+              ₹{" "}
               <CountUp from={0} to={totalSales} duration={1.5} separator="," />
             </span>
           }
@@ -289,7 +289,7 @@ const SellerAnalytics = () => {
           title="Avg Order Value"
           value={
             <span className="text-red-600">
-              ৳{" "}
+              ₹{" "}
               <CountUp
                 from={0}
                 to={parseFloat(averageOrderValue.toFixed(2))} // round to 2 decimals

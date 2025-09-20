@@ -34,12 +34,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
   const productsPerPage = 8;
   const [loading, setLoading] = useState(true);
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = products.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const currentProducts = products;
 
   const totalPages = Math.ceil(products.length / productsPerPage);
 
@@ -131,15 +126,15 @@ const ProductCart = ({ products }: ProductCartProps) => {
                         {product.discountPrice ? (
                           <>
                             <span className="text-orange-600 font-bold">
-                              ৳{product.discountPrice}
+                              ₹{product.discountPrice}
                             </span>
                             <span className="text-xs text-gray-500 line-through">
-                              ৳{product.price}
+                              ₹{product.price}
                             </span>
                           </>
                         ) : (
                           <span className="text-gray-800 font-semibold">
-                            ৳{product.price}
+                            ₹{product.price}
                           </span>
                         )}
                       </div>
@@ -186,20 +181,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
             )}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex justify-center">
-              <Pagination
-                showControls
-                total={totalPages}
-                page={currentPage}
-                onChange={setCurrentPage}
-                classNames={{
-                  cursor: "bg-[#F85606] text-white",
-                }}
-              />
-            </div>
-          )}
+
         </main>
       )}
     </>

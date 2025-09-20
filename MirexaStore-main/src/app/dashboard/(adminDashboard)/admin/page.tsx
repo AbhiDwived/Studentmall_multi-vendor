@@ -34,6 +34,9 @@ const AdminAnalytics = () => {
   const [totalsellers, setTotalsellers] = useState(0); // Track total sellers
   const [sellerSalesMap, setSellerSalesMap] = useState<any>({});
   const [sellerStatusMap, setSellerStatusMap] = useState<any>({});
+  const [categories, setCategories] = useState<any[]>([]);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [newCategory, setNewCategory] = useState({ name: "", slug: "", bannerImage: "" });
 
   const [chartData, setChartData] = useState<any>({
     labels: [],
@@ -125,6 +128,11 @@ const AdminAnalytics = () => {
         setUniqueSellers(totalUniqueSellers.size);
         setSellerSalesMap(sellerMap);
         setSellerStatusMap(sellerStatus);
+        
+        // Fetch categories
+        const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData.data || []);
 
         const sellerLabels = Object.keys(sellerMap);
         const sellerData = Object.values(sellerMap);
@@ -133,7 +141,7 @@ const AdminAnalytics = () => {
           labels: sellerLabels,
           datasets: [
             {
-              label: "Sales by Seller (৳)",
+              label: "Sales by Seller (₹)",
               data: sellerData,
               backgroundColor: "#F97316",
             },
@@ -208,6 +216,61 @@ const AdminAnalytics = () => {
   // Pagination Handler
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategory.name || !newCategory.slug) {
+      alert("Name and slug are required");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(newCategory)
+      });
+      
+      if (response.ok) {
+        alert("Category created successfully!");
+        setNewCategory({ name: "", slug: "", bannerImage: "" });
+        setShowCategoryForm(false);
+        // Refresh categories
+        const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+        const categoriesData = await categoriesResponse.json();
+        setCategories(categoriesData.data || []);
+      }
+    } catch (error) {
+      alert("Failed to create category");
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    if (!confirm("Are you sure you want to delete this category?")) return;
+    
+    try {
+      const token = localStorage.getItem("accessToken");
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category/${categoryId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Category deleted successfully!");
+      // Refresh categories
+      const categoriesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+      const categoriesData = await categoriesResponse.json();
+      setCategories(categoriesData.data || []);
+    } catch (error) {
+      alert("Failed to delete category");
+    }
+  };
+
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
@@ -219,7 +282,7 @@ const AdminAnalytics = () => {
         <Card
           icon={<FaDollarSign />}
           title="Total Sales"
-          value={`৳ ${totalSales}`}
+          value={`₹ ${totalSales}`}
           color="text-blue-600"
         />
         <Card

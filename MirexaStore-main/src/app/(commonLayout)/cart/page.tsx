@@ -261,7 +261,7 @@ const CartPage = () => {
                     <p className="text-sm text-gray-600 mb-1">
                       Price:{" "}
                       <span className="font-semibold">
-                        ৳{item.price.toFixed(2)}
+                        ₹{item.price.toFixed(2)}
                       </span>
                     </p>
                     {item.color && (
@@ -335,7 +335,7 @@ const CartPage = () => {
               <div className="text-lg text-gray-700 mb-6 flex justify-between">
                 <span>Total:</span>
                 <span className="font-semibold text-orange-600">
-                  ৳{totalPrice.toFixed(2)}
+                  ₹{totalPrice.toFixed(2)}
                 </span>
               </div>
 

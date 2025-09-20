@@ -140,6 +140,7 @@ const AddProduct = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [currentColor, setCurrentColor] = useState("#ff0000");
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
   const [deliveryCharges, setDeliveryCharges] = React.useState<
@@ -165,6 +166,17 @@ const AddProduct = () => {
   const removeColor = (color: string) => {
     setColors(colors.filter((c) => c !== color));
   };
+  const fetchDynamicCategories = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/category`);
+      const data = await res.json();
+      setDynamicCategories(Array.isArray(data.data) ? data.data : []);
+    } catch (error) {
+      console.error("Failed to load categories", error);
+      setDynamicCategories([]);
+    }
+  };
+
   useEffect(() => {
     const fetchBrandSlug = async () => {
       try {
@@ -182,6 +194,9 @@ const AddProduct = () => {
     if (user?.email) {
       fetchBrandSlug();
     }
+    
+    // Fetch dynamic categories
+    fetchDynamicCategories();
   }, [user?.email]);
 
   useEffect(() => {
@@ -679,45 +694,11 @@ const AddProduct = () => {
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
           <option value="">Select a category</option>
-          <option value="Electronics">Electronics</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Books">Books</option>
-          <option value="Home & Kitchen">Home & Kitchen</option>
-          <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-          <option value="Sports & Outdoors">Sports & Outdoors</option>
-          <option value="Toys & Games">Toys & Games</option>
-          <option value="Automotive">Automotive</option>
-          <option value="Health & Wellness">Health & Wellness</option>
-          <option value="Office Supplies">Office Supplies</option>
-          <option value="Jewelry & Accessories">Jewelry & Accessories</option>
-          <option value="Garden & Outdoor">Garden & Outdoor</option>
-          <option value="Baby Products">Baby Products</option>
-          <option value="Groceries & Gourmet Food">
-            Groceries & Gourmet Food
-          </option>
-          <option value="Pet Supplies">Pet Supplies</option>
-          <option value="Music & Instruments">Music & Instruments</option>
-          <option value="Movies & TV Shows">Movies & TV Shows</option>
-          <option value="Tools & Hardware">Tools & Hardware</option>
-          <option value="Computers & Accessories">
-            Computers & Accessories
-          </option>
-          <option value="Mobile Phones & Accessories">
-            Mobile Phones & Accessories
-          </option>
-          <option value="Footwear">Footwear</option>
-          <option value="Handbags & Wallets">Handbags & Wallets</option>
-          <option value="Art & Craft Supplies">Art & Craft Supplies</option>
-          <option value="Luggage & Travel Gear">Luggage & Travel Gear</option>
-          <option value="Collectibles & Memorabilia">
-            Collectibles & Memorabilia
-          </option>
-          <option value="Kitchen Appliances">Kitchen Appliances</option>
-          <option value="Furniture">Furniture</option>
-          <option value="Software & Apps">Software & Apps</option>
-          <option value="Industrial & Scientific">
-            Industrial & Scientific
-          </option>
+          {dynamicCategories.map((category) => (
+            <option key={category._id || category.slug} value={category.name}>
+              {category.name}
+            </option>
+          ))}
           <option value="Others">Others</option>
         </select>
 

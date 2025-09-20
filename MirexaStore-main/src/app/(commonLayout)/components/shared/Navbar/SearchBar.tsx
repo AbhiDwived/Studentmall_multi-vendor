@@ -140,15 +140,15 @@ const SearchBar = () => {
                       product.discountPrice < product.price ? (
                         <>
                           <p className="text-xs text-gray-400 line-through">
-                            ৳ {product.price?.toLocaleString()}
+                            ₹ {product.price?.toLocaleString()}
                           </p>
                           <p className="text-[#F85606] font-semibold text-sm">
-                            ৳ {product.discountPrice?.toLocaleString()}
+                            ₹ {product.discountPrice?.toLocaleString()}
                           </p>
                         </>
                       ) : (
                         <p className="text-[#F85606] font-semibold text-sm">
-                          ৳ {product.price?.toLocaleString()}
+                          ₹ {product.price?.toLocaleString()}
                         </p>
                       )}
                     </div>
@@ -233,15 +233,15 @@ const SearchBar = () => {
                           product.discountPrice < product.price ? (
                             <>
                               <p className="text-xs text-gray-400 line-through">
-                                ৳ {product.price?.toLocaleString()}
+                                ₹ {product.price?.toLocaleString()}
                               </p>
                               <p className="text-[#F85606] font-semibold text-sm">
-                                ৳ {product.discountPrice?.toLocaleString()}
+                                ₹ {product.discountPrice?.toLocaleString()}
                               </p>
                             </>
                           ) : (
                             <p className="text-[#F85606] font-semibold text-sm">
-                              ৳ {product.price?.toLocaleString()}
+                              ₹ {product.price?.toLocaleString()}
                             </p>
                           )}
                         </div>

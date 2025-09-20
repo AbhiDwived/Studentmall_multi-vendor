@@ -96,9 +96,11 @@ const ProfileDropdown = () => {
           `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`
         );
         setSellerSlug(res.data?.data?.brand?.slug || "");
-        console.log(res);
-      } catch (error) {
-        console.error("Failed to fetch seller profile", error);
+      } catch (error: any) {
+        // Silently handle 404 errors - seller profile might not exist yet
+        if (error?.response?.status !== 404) {
+          console.error("Failed to fetch seller profile", error);
+        }
       }
     };
 

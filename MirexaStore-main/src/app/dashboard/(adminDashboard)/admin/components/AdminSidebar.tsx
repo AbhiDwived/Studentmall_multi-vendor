@@ -11,6 +11,7 @@ import {
   FaUserCheck,
   FaUserPlus,
   FaMoneyCheckAlt,
+  FaTags,
 } from "react-icons/fa";
 
 interface AdminSidebarProps {

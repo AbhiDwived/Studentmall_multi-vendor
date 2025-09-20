@@ -195,13 +195,13 @@ const OrderDetails: React.FC = () => {
             </div>
             <div className="flex flex-col justify-center items-center md:items-end mt-4 md:mt-0 space-y-2">
               <p className="text-lg text-gray-600">
-                <strong>Price:</strong> ৳{order.totalAmount.toFixed(2)}
+                <strong>Price:</strong> ₹{order.totalAmount.toFixed(2)}
               </p>
               <p className="text-lg text-gray-600">
-                <strong>Shipping Cost:</strong> ৳{order.shippingCost.toFixed(2)}
+                <strong>Shipping Cost:</strong> ₹{order.shippingCost.toFixed(2)}
               </p>
               <p className="text-xl font-bold text-gray-900">
-                <strong>Total Amount:</strong> ৳{order.totalPrice.toFixed(2)}
+                <strong>Total Amount:</strong> ₹{order.totalPrice.toFixed(2)}
               </p>
             </div>
           </div>
@@ -239,7 +239,7 @@ const OrderDetails: React.FC = () => {
                       {item.name || "Unknown Product"}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      <strong>Price:</strong> ৳{item.price.toFixed(2)}
+                      <strong>Price:</strong> ₹{item.price.toFixed(2)}
                     </p>
                     <p className="text-sm text-gray-600">
                       <strong>Quantity:</strong> {item.quantity}

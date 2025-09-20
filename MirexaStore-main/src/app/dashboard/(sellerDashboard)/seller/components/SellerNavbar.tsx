@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { MoreVertical, Bell, Search, LogOut, Home } from "lucide-react";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { logoutUser } from "@/app/lib/redux/features/authSlice";
 
 interface SellerNavbarProps {
   onMenuClick: () => void;
@@ -12,6 +15,8 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const userImage = ""; // Use actual image URL if available
   const userName = "Seller"; // Fallback initials or username
@@ -30,31 +35,33 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 w-full bg-white shadow-md px-4 py-3 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-30 w-full bg-[#0A3D62] shadow-lg px-4 py-3 flex items-center justify-between">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="md:hidden text-[#F6550C] p-2 rounded hover:bg-gray-100 transition"
+          className="md:hidden text-white p-2 rounded hover:bg-gray-700 transition"
           aria-label="Toggle sidebar"
         >
           <MoreVertical size={24} />
         </button>
 
-        <h1 className="text-xl font-extrabold text-[#F6550C] select-none">
-          Mirexa Seller
-        </h1>
+        <div className="text-white font-bold text-xl tracking-wide">
+          <span className="text-[#F39C12]">Student</span>
+          <span className="text-white">Mall</span>
+          <span className="text-[#F6550C] ml-2">Seller</span>
+        </div>
       </div>
 
       {/* Right Section */}
       <div className="flex items-center gap-4 relative">
         {/* Search */}
-        <div className="hidden md:flex items-center bg-gray-100 px-3 py-1 rounded-md">
-          <Search size={18} className="text-gray-500 mr-2" />
+        <div className="hidden md:flex items-center bg-white bg-opacity-20 px-3 py-1 rounded-md">
+          <Search size={18} className="text-white mr-2" />
           <input
             type="text"
             placeholder="Search"
-            className="bg-transparent outline-none text-sm w-36 placeholder-gray-500"
+            className="bg-transparent outline-none text-sm w-36 placeholder-white text-white"
           />
         </div>
 
@@ -63,7 +70,7 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
         <div className="relative pt-2">
           <button
             onClick={() => setShowNotification((prev) => !prev)}
-            className="relative text-gray-600 hover:text-[#F6550C] transition"
+            className="relative text-white hover:text-[#F39C12] transition"
             aria-label="Notifications"
           >
             <Bell size={22} />
@@ -92,7 +99,7 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
             {/* Avatar */}
             <div
               onClick={toggleDropdown}
-              className="w-9 h-9 rounded-full border-2 border-[#F6550C] cursor-pointer overflow-hidden flex items-center justify-center bg-gray-200 text-sm font-bold text-[#F6550C]"
+              className="w-9 h-9 rounded-full border-2 border-[#F39C12] cursor-pointer overflow-hidden flex items-center justify-center bg-gray-200 text-sm font-bold text-[#F39C12]"
               title="Profile"
             >
               {userImage ? (
@@ -121,7 +128,7 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
                       className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <Home size={16} className="text-[#F6550C]" />
+                        <Home size={16} className="text-[#F39C12]" />
                         <span>Go to Home</span>
                       </div>
                     </Link>
@@ -129,8 +136,8 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
                   <li>
                     <button
                       onClick={() => {
-                        console.log("Logout clicked");
-                        // Insert logout logic here
+                        dispatch(logoutUser());
+                        router.push("/login");
                       }}
                       role="menuitem"
                       className="block w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-600 dark:hover:text-white transition-colors"

@@ -11,6 +11,7 @@ import { FollowRoutes } from "../modules/follow/follow.route";
 import { RoutesForSeller } from "../modules/sellerRequest/sellerRequest.route";
 import { CourierRoutes } from "../modules/courier/courier.route";
 import { SubscriptionRoutes } from "../modules/subscription/subscription.route";
+import { BrandRoutes } from "../modules/brand/brand.route";
 const router = Router();
 
 const moduleRoutes = [
@@ -65,6 +66,10 @@ const moduleRoutes = [
   {
     path: "/subscription",
     route: SubscriptionRoutes
+  },
+  {
+    path: "/brand",
+    route: BrandRoutes
   }
 
 

@@ -31,7 +31,7 @@ const createProductIntoDb = async (productData: Partial<TProduct>) => {
 	}
 
 	// 🔔 Email to Admin
-	const adminEmail = 'mdeasinsarkar01@gmail.com';
+	const adminEmail = 'abhidwivedi687@gmail.com';
 	if (adminEmail) {
 		const productName = newProduct?.name || 'a product';
 		const sellerName = newProduct?.sellerName || 'Unknown Seller';

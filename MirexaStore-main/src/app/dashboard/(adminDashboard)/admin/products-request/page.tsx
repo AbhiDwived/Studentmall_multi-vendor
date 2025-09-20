@@ -46,19 +46,28 @@ const ProductRequest = () => {
   const token = useSelector((state: any) => state.auth?.token);
 
   const fetchProducts = async () => {
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     try {
-      const endpoint =
-        tab === "all"
-          ? `${process.env.NEXT_PUBLIC_API_URL}/product`
-          : `${process.env.NEXT_PUBLIC_API_URL}/product/inactive-draft`;
-
+      const endpoint = tab === "inactive-draft" 
+        ? `${process.env.NEXT_PUBLIC_API_URL}/product/inactive-draft`
+        : `${process.env.NEXT_PUBLIC_API_URL}/product`;
+      
       const res = await fetch(endpoint, {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
       });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
       setProducts(data.data || []);
     } catch (err) {
@@ -109,7 +118,7 @@ const ProductRequest = () => {
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold text-[#F6550C] mb-6 text-center">
-        Manage Product Status
+        Manage Product Status ({products.length} products)
       </h1>
 
       {/* Tabs */}
@@ -139,7 +148,11 @@ const ProductRequest = () => {
       {loading ? (
         <ProductsRequestSkeleton></ProductsRequestSkeleton>
       ) : products.length === 0 ? (
-        <p className="text-center text-gray-500">No products found.</p>
+        <div className="text-center text-gray-500 p-8">
+          <p className="text-lg mb-2">No products found for "{tab}" tab.</p>
+          <p className="text-sm">Try switching tabs or add some products first.</p>
+          <p className="text-xs mt-2 text-gray-400">Current API endpoint: {tab === "all" ? "/product" : "/product/inactive-draft"}</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {products.map((product) => (
@@ -187,11 +200,11 @@ const ProductRequest = () => {
               <p className="text-sm">
                 <span className="font-medium text-gray-800">Price:</span>{" "}
                 <span className="text-[#F6550C] font-semibold">
-                  ৳{product.discountPrice || product.price}
+                  ₹{product.discountPrice || product.price}
                 </span>{" "}
                 {product.discountPrice && (
                   <span className="line-through ml-2 text-gray-400">
-                    ৳{product.price}
+                    ₹{product.price}
                   </span>
                 )}
               </p>

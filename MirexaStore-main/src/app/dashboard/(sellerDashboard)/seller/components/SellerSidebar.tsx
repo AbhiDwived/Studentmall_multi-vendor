@@ -17,6 +17,7 @@ import {
   ClipboardList,
   ChevronDown,
   ChevronUp,
+  Tags,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
@@ -53,8 +54,9 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
           `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`
         );
         setSellerSlug(res.data?.data?.brand?.slug || null);
-      } catch (error) {
-        console.error("Failed to fetch seller profile", error);
+      } catch (error: any) {
+        // Silently handle errors - seller profile might not exist yet
+        setSellerSlug(null);
       }
     };
 
@@ -133,6 +135,20 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
               >
                 <FileWarning size={16} className="text-yellow-600" />
                 Inactive / Under-review
+              </Link>
+              <Link
+                href="/dashboard/seller/categories"
+                className={linkStyle("/dashboard/seller/categories")}
+              >
+                <Tags size={16} className="text-[#EA580C]" />
+                Categories
+              </Link>
+              <Link
+                href="/dashboard/seller/brands"
+                className={linkStyle("/dashboard/seller/brands")}
+              >
+                <Store size={16} className="text-[#EA580C]" />
+                Brands
               </Link>
             </div>
           </div>
