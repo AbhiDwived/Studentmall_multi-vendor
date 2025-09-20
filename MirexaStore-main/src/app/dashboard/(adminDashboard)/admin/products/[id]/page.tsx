@@ -32,7 +32,7 @@ const EditProductPage = () => {
 
   const removeImage = (index: number) => {
     const currentImages = getImageArray();
-    const newImages = currentImages.filter((_, i) => i !== index).join(', ');
+    const newImages = currentImages.filter((_: string, i: number) => i !== index).join(', ');
     setProduct((prev: any) => ({ ...prev, productImages: newImages }));
   };
 

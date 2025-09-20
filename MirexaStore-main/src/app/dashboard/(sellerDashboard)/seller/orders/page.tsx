@@ -112,7 +112,7 @@ const SellerOrders: React.FC = () => {
         }
       );
       toast.success(`Order status updated to ${newStatus}`);
-      fetchOrdersRefresh();
+      fetchOrders();
     } catch (err) {
       toast.error("Failed to update order status. Please try again.");
     }
@@ -155,7 +155,7 @@ const SellerOrders: React.FC = () => {
                   autoClose: 10000,
                 });
 
-                fetchOrdersRefresh();
+                fetchOrders();
               } catch (err) {
                 toast.error("❌ Failed to cancel order. Please try again.");
               }
