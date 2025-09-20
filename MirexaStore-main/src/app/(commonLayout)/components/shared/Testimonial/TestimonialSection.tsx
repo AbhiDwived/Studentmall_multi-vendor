@@ -10,7 +10,7 @@ const fetchInitialReviews = async (page: number = 1, limit: number = 6) => {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/reviews/all?page=${page}&limit=${limit}`,
-      { cache: "no-store" }
+      { next: { revalidate: 60 } }
     );
     
     if (!res.ok) {
