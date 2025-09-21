@@ -51,11 +51,20 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
 
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`
+          `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`,
+          { validateStatus: (status) => status < 500 } // Don't throw on 404
         );
-        setSellerSlug(res.data?.data?.brand?.slug || null);
+        
+        if (res.status === 200) {
+          setSellerSlug(res.data?.data?.brand?.slug || null);
+        } else {
+          setSellerSlug(null);
+        }
       } catch (error: any) {
-        // Silently handle errors - seller profile might not exist yet
+        // Only log unexpected errors (server errors, network issues)
+        if (error.response?.status >= 500) {
+          console.error('Server error fetching seller profile:', error);
+        }
         setSellerSlug(null);
       }
     };

@@ -289,7 +289,7 @@ const CategoriesPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
               <div key={category._id} className="border rounded-lg p-4 hover:shadow-md transition">
-                <div className="w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden">
+                <div className="relative w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden">
                   {category.bannerImage && (
                     <Image
                       src={category.bannerImage}

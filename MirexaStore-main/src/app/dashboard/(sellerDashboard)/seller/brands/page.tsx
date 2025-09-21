@@ -267,7 +267,7 @@ const BrandsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {brands.map((brand) => (
               <div key={brand._id} className="border rounded-lg p-4 hover:shadow-md transition">
-                <div className="w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden flex items-center justify-center">
                   {brand.logo ? (
                     <Image
                       src={brand.logo}
