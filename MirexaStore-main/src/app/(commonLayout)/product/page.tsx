@@ -1,24 +1,37 @@
-// src/app/components/ProductSection.server.tsx
+"use client";
 
+import { useState, useEffect } from "react";
 import ProductCart from "../components/ui/ProductCart";
 
-const Product = async () => {
-  const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/product`;
+const Product = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  let products = [];
-  
-  try {
-    const response = await fetch(apiUrl, {
-      next: { revalidate: 60 }, // ✅ Revalidate every 60 seconds
-    });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product`);
+        if (response.ok) {
+          const responseData = await response.json();
+          setProducts(responseData.data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (response.ok) {
-      const responseData = await response.json();
-      products = responseData.data || [];
-    }
-  } catch (error) {
-    console.log('Failed to fetch products during build, using empty array');
-    products = [];
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading products...</p>
+      </div>
+    );
   }
 
   // Filter for featured products
