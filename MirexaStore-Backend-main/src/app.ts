@@ -12,8 +12,7 @@ const app: Application = express();
 
 // Allowed frontend origins
 const allowedOrigins = [
-  'https://studentmall-multi-vendor.onrender.com/',
-  'https://studentmall-multi-vendor-3ylj96fbz.vercel.app', // Your Vercel deployment
+  'https://studentmall-frontend-rpbxxj-ec058a-147-93-18-171.traefik.me', // Your Vercel deployment
   'http://localhost:3000', // Development frontend
   'http://localhost:3001', // Alternative development port
 ];
