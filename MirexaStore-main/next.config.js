@@ -14,13 +14,6 @@ const nextConfig = {
       },
     ],
   },
-  experimental: {
-    optimizePackageImports: ['@heroicons/react', 'lucide-react'],
-  },
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    return config;
-  },
 };
 
 module.exports = nextConfig;
