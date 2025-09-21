@@ -8,8 +8,7 @@ import Image from "next/image";
 import WithAuth from "@/app/lib/utils/withAuth";
 import { RootState } from "@/app/lib/redux/store";
 import { useAppSelector } from "@/app/lib/redux/hook";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+
 
 interface ShippingDetails {
   fullName: string;
@@ -117,41 +116,9 @@ const OrderDetails: React.FC = () => {
     }
   };
 
-  const handleDownloadInvoice = async () => {
-    if (!invoiceRef.current) return;
-
-    const style = document.createElement("style");
-    style.innerHTML = `
-      * {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        box-shadow: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-
-    try {
-      const canvas = await html2canvas(invoiceRef.current, {
-        useCORS: true,
-        allowTaint: true,
-        scale: 2,
-        backgroundColor: "#ffffff",
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Invoice_${order?.id.slice(-6)}.pdf`);
-    } catch (err) {
-      console.error("Invoice generation failed:", err);
-      setError("Invoice download failed. Please try again.");
-    } finally {
-      document.head.removeChild(style);
-    }
+  const handleDownloadInvoice = () => {
+    alert("PDF download feature temporarily unavailable. Please use browser print function.");
+    window.print();
   };
 
   if (loading) return <Loading />;
