@@ -46,6 +46,6 @@ const courierSchema = new Schema<ICourierRequest>(
   { timestamps: true }
 );
 
-courierSchema.index({ orderId: 1 }, { unique: true });
+
 
 export const Courier = model<ICourierRequest>("Courier", courierSchema);
