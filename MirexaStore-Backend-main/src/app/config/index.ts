@@ -5,7 +5,6 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 const requiredEnvVariables = [
   'NODE_ENV',
-  'PORT',
   'DATABASE_URL',
   'BCRYPT_SALT_ROUNDS',
   'JWT_ACCESS_SECRET',
@@ -31,7 +30,7 @@ requiredEnvVariables.forEach((key) => {
 
 export default {
   NODE_ENV: process.env.NODE_ENV!,
-  port: process.env.PORT!,
+  port: process.env.PORT || '5000',
   database_url: process.env.DATABASE_URL!,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS!,
   jwt_access_secret: process.env.JWT_ACCESS_SECRET!,
