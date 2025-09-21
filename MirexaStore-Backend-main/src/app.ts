@@ -20,14 +20,24 @@ const allowedOrigins = [
 
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
+    console.log('CORS Origin:', origin);
+    // Temporary: Allow all origins for debugging
+    if (config.NODE_ENV === 'production') {
+      callback(null, true); // Allow all origins temporarily
     } else {
-      callback(new Error('Not allowed by CORS'));
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        console.log('CORS: Origin allowed');
+        callback(null, true);
+      } else {
+        console.log('CORS: Origin blocked');
+        callback(new Error('Not allowed by CORS'));
+      }
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
