@@ -53,17 +53,7 @@ const CategorySeeder = () => {
     window.location.reload(); // Refresh to show new categories
   };
 
-  return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <button
-        onClick={seedCategories}
-        disabled={isSeeding}
-        className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 disabled:opacity-50"
-      >
-        {isSeeding ? "Adding..." : "Seed Categories"}
-      </button>
-    </div>
-  );
+  return null;
 };
 
 export default CategorySeeder;
