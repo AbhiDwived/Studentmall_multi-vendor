@@ -21,7 +21,7 @@ export default function SellerBenefitsPage() {
     {
       icon: <Trophy className="w-5 h-5 text-white" />,
       title: "Grow Your Business",
-      desc: "Reach millions of customers across Bangladesh through our platform.",
+      desc: "Reach millions of customers across India through our platform.",
     },
     {
       icon: <DollarSign className="w-5 h-5 text-white" />,

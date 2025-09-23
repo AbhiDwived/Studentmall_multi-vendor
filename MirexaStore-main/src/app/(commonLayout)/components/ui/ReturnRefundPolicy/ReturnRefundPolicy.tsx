@@ -102,7 +102,7 @@ const ReturnRefundPolicy = () => {
                   href="tel:+91 8433208146"
                   className="text-accent-orange hover:underline"
                 >
-                  +880-1405671742
+                  +91 8433208146
                 </a>
               </li>
             </ul>

@@ -29,7 +29,7 @@ const Register = () => {
           email,
           password,
           phone,
-          address: address || "Bangladesh", // Address খালি থাকলে না পাঠাবে
+          address: address || "India", // Address খালি থাকলে না পাঠাবে
           role: "user", // Fixed role set to 'user'
         }
       );

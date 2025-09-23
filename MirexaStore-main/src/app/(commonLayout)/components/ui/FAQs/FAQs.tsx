@@ -42,7 +42,7 @@ const FAQs = () => {
       question:
         "How can I contact customer support?",
       answer:
-        "You can reach out to our customer support team via email at support@studentmall.com or by calling +880-1405671742. We are available to assist you with any questions or issues you may have."
+        "You can reach out to our customer support team via email at support@studentmall.com or by calling +91 8433208146. We are available to assist you with any questions or issues you may have."
     },
   ];
 

@@ -95,7 +95,7 @@ const uploadImageToCloudinary = async (file: File) => {
       }
     );
     const data = await res.json();
-    return data.secure_url; // eta hocche upload hoye jawa image er URL
+    return data.secure_url; // This is the URL of the uploaded image
   } catch (error) {
     console.error("Upload failed:", error);
     throw error;
@@ -762,7 +762,7 @@ const AddProduct = () => {
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
         {renderInputField(
-          "Affiliate Link (এই ঘরটি শুধু তখনই পূরণ করুন যদি প্রোডাক্টটি affiliate টাইপের হয়। না হলে ফাঁকা রাখুন।)",
+          "Affiliate Link (Only fill this field if the product is affiliate type. Otherwise leave it empty.)",
           "affiliateLink",
           "text",
           Link,

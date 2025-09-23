@@ -26,7 +26,7 @@ const ShippingPolicy = () => {
               <span className="font-semibold">2-3 business days</span>. Once
               your order is shipped, you will receive a tracking number.
               Delivery times vary depending on your location but typically range
-              from 5-7 business days within Bangladesh. For international
+              from 5-7 business days within India. For international
               orders, shipping may take 10-15 business days.
             </p>
           </div>
@@ -64,7 +64,7 @@ const ShippingPolicy = () => {
               4. Shipping Restrictions
             </h2>
             <p className="text-[#4B4B4B] leading-relaxed">
-              We currently only ship to locations within Bangladesh and select
+              We currently only ship to locations within India and select
               international countries. If we are unable to ship to your
               location, we will notify you at the earliest opportunity.
             </p>
@@ -109,7 +109,7 @@ const ShippingPolicy = () => {
                   href="tel:+91 8433208146"
                   className="text-[#F39C12] hover:underline"
                 >
-                  +880-1405671742
+                  +91 8433208146
                 </a>
               </li>
             </ul>

@@ -33,7 +33,7 @@ async function createAdmin() {
       email: adminEmail,
       password: hashedPassword,
       phone: '01700000000',
-      address: 'Bangladesh',
+      address: 'India',
       role: 'admin'
     });
     

@@ -98,7 +98,7 @@ const uploadImageToCloudinary = async (file: File) => {
       }
     );
     const data = await res.json();
-    return data.secure_url; // eta hocche upload hoye jawa image er URL
+    return data.secure_url; // This is the URL of the uploaded image
   } catch (error) {
     console.error("Upload failed:", error);
     throw error;
@@ -686,11 +686,9 @@ const AddProduct = () => {
           "#F6550C",
           true
         )}
-        <label
-          className="block text-base font-medium mb-1"
-          style={{ color: "#F6550C" }}
-        >
-          Category<span className="text-red-500 ml-1">*</span>
+        <label className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
+          Category
+          <span className="text-red-500">*</span>
         </label>
         <select
           className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
@@ -788,7 +786,7 @@ const AddProduct = () => {
         {renderArrayField("Sizes", sizes, setSizes)}
         {renderArrayField("Features", features, setFeatures)}
         {renderInputField(
-          "Affiliate Link (এই ঘরটি শুধু তখনই পূরণ করুন যদি প্রোডাক্টটি affiliate টাইপের হয়। না হলে ফাঁকা রাখুন।)",
+          "Affiliate Link (Only fill this field if the product is affiliate type. Otherwise leave it empty.)",
           "affiliateLink",
           "text",
           Link,

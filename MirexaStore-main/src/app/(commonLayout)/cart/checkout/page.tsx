@@ -46,9 +46,11 @@ type FormDataType = {
   email: string;
   address: string;
   city: string;
+  state: string;
   district: string;
   deliveryNote: string;
   country: string;
+  [key: string]: string;
 };
 
 type UserType = {
@@ -102,7 +104,7 @@ type ProductType = {
   videoUrl: string;
   deliveryCharges: DeliveryCharge[];
   defaultDeliveryCharge: number;
-  reviews: any[]; // যদি রিভিউ এর টাইপ জানো, সেটা এখানে দিয়ে দাও
+  reviews: any[];
   rating: number;
   totalReviews: number;
   status: string;
@@ -114,10 +116,10 @@ type ProductType = {
   features: string[];
   weight: number;
   warranty: string;
-  deletedBy: null | string; // এখানে null বা string হতে পারে
+  deletedBy: null | string;
   isDeleted: boolean;
   createdAt: {
-    $date: string; // ISO string
+    $date: string;
   };
   updatedAt: {
     $date: string;
@@ -129,7 +131,7 @@ const CheckoutPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [shippingCost, setShippingCost] = useState(0); // Default shipping for Dhaka
+  const [shippingCost, setShippingCost] = useState(0);
   const [singleShipping, setSingleShipping] = useState(0);
   const [user, setUser] = useState<UserType | null>(null);
   const [formData, setFormData] = useState<FormDataType>({
@@ -137,98 +139,93 @@ const CheckoutPage = () => {
     phone: "",
     email: "",
     address: "",
-    city: "Dhaka",
+    city: "Mumbai",
+    state: "",
     district: "",
     deliveryNote: "",
-    country: "Bangladesh",
+    country: "India",
   });
-  const [paymentMethod, setPaymentMethod] = useState("cod"); // default is COD
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [transactionId, setTransactionId] = useState("");
-  const [sellerBkashNumber, setSellerBkashNumber] = useState(""); // You can fetch this from seller data
-  const [finalBkashNumber, setFinalBkashNumber] = useState("017XXXXXXXX");
+  const [sellerUpiId, setSellerUpiId] = useState("");
+  const [finalUpiId, setFinalUpiId] = useState("example@upi");
   const [isFirstOrder, setIsFirstOrder] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isMultipleSellers, setIsMultipleSellers] = useState(false);
-  const [fetchedProducts, setFetchedProducts] = React.useState<ProductType[]>(
-    []
-  );
+  const [fetchedProducts, setFetchedProducts] = React.useState<ProductType[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [loadingStates, setLoadingStates] = useState(false);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
   console.log(fetchedProducts);
   const router = useRouter();
-  type FormDataType = {
-    [key: string]: any;
-  };
-  const divisionDistrictMap: Record<string, string[]> = {
-    Dhaka: [
-      "Dhaka",
-      "Gazipur",
-      "Kishoreganj",
-      "Manikganj",
-      "Munshiganj",
-      "Narayanganj",
-      "Narsingdi",
-      "Rajbari",
-      "Shariatpur",
-      "Tangail",
-      "Faridpur",
-      "Gopalganj",
-      "Madaripur",
-    ],
-    Chattogram: [
-      "Chattogram",
-      "Cox's Bazar",
-      "Bandarban",
-      "Khagrachari",
-      "Rangamati",
-      "Brahmanbaria",
-      "Cumilla",
-      "Chandpur",
-      "Feni",
-      "Lakshmipur",
-      "Noakhali",
-    ],
-    Khulna: [
-      "Khulna",
-      "Bagerhat",
-      "Satkhira",
-      "Jessore",
-      "Jhenaidah",
-      "Magura",
-      "Meherpur",
-      "Narail",
-      "Chuadanga",
-      "Kushtia",
-    ],
-    Rajshahi: [
-      "Rajshahi",
-      "Chapai Nawabganj",
-      "Naogaon",
-      "Natore",
-      "Pabna",
-      "Joypurhat",
-      "Bogura",
-      "Sirajganj",
-    ],
-    Barisal: [
-      "Barisal",
-      "Barguna",
-      "Bhola",
-      "Jhalokati",
-      "Patuakhali",
-      "Pirojpur",
-    ],
-    Sylhet: ["Sylhet", "Habiganj", "Moulvibazar", "Sunamganj"],
-    Rangpur: [
-      "Rangpur",
-      "Dinajpur",
-      "Gaibandha",
-      "Kurigram",
-      "Lalmonirhat",
-      "Nilphamari",
-      "Panchagarh",
-      "Thakurgaon",
-    ],
-    Mymensingh: ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"],
-  };
+
+  // Fetch Indian states from API
+  useEffect(() => {
+    const fetchStates = async () => {
+      setLoadingStates(true);
+      try {
+        const response = await fetch('https://api.countrystatecity.in/v1/countries/IN/states', {
+          headers: {
+            'X-CSCAPI-KEY': 'NHhvOEcyWk50N2Vna3VFTE00bFp3MjFKR0ZEOUhkZlg4RTk1MlJlaA=='
+          }
+        });
+        const data = await response.json();
+        setStates(data.map((state: any) => state.name));
+      } catch (error) {
+        console.error('Error fetching states:', error);
+        setStates(["Maharashtra", "Karnataka", "Tamil Nadu", "Gujarat", "Rajasthan", "West Bengal", "Uttar Pradesh", "Haryana", "Punjab", "Madhya Pradesh", "Bihar", "Odisha", "Kerala", "Assam", "Delhi"]);
+      } finally {
+        setLoadingStates(false);
+      }
+    };
+    fetchStates();
+  }, []);
+
+  // Fetch districts based on selected state
+  useEffect(() => {
+    if (!formData.state) {
+      setDistricts([]);
+      return;
+    }
+
+    const fetchDistricts = async () => {
+      setLoadingDistricts(true);
+      try {
+        const statesResponse = await fetch('https://api.countrystatecity.in/v1/countries/IN/states', {
+          headers: {
+            'X-CSCAPI-KEY': 'NHhvOEcyWk50N2Vna3VFTE00bFp3MjFKR0ZEOUhkZlg4RTk1MlJlaA=='
+          }
+        });
+        const statesData = await statesResponse.json();
+        const selectedState = statesData.find((state: any) => state.name === formData.state);
+        
+        if (selectedState) {
+          const citiesResponse = await fetch(`https://api.countrystatecity.in/v1/countries/IN/states/${selectedState.iso2}/cities`, {
+            headers: {
+              'X-CSCAPI-KEY': 'NHhvOEcyWk50N2Vna3VFTE00bFp3MjFKR0ZEOUhkZlg4RTk1MlJlaA=='
+            }
+          });
+          const citiesData = await citiesResponse.json();
+          setDistricts(citiesData.map((city: any) => city.name));
+        }
+      } catch (error) {
+        console.error('Error fetching districts:', error);
+        const fallbackDistricts: Record<string, string[]> = {
+          "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad"],
+          "Karnataka": ["Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum"],
+          "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"],
+          "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar"],
+          "Delhi": ["New Delhi", "North Delhi", "South Delhi", "East Delhi", "West Delhi"]
+        };
+        setDistricts(fallbackDistricts[formData.state] || []);
+      } finally {
+        setLoadingDistricts(false);
+      }
+    };
+
+    fetchDistricts();
+  }, [formData.state]);
 
   useEffect(() => {
     const storedCart = localStorage.getItem("cart");
@@ -246,10 +243,11 @@ const CheckoutPage = () => {
         phone: storedUser.phone,
         email: storedUser.email,
         address: storedUser.address,
-        city: "Dhaka",
+        city: "Mumbai",
+        state: "",
         district: "",
         deliveryNote: "",
-        country: "Bangladesh",
+        country: "India",
       });
 
       checkFirstOrder(storedUser._id);
@@ -311,15 +309,14 @@ const CheckoutPage = () => {
       return;
     }
 
-    if (["bkash", "adminBkash"].includes(paymentMethod) && !transactionId) {
-      toast.error("অনুগ্রহ করে আপনার বিকাশ Transaction ID লিখুন।");
+    if (["upi", "adminUpi"].includes(paymentMethod) && !transactionId) {
+      toast.error("Please enter your UPI Transaction ID.");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Group cart items by sellerEmail
       const itemsGroupedBySeller: Record<string, CartItem[]> = {};
       cartItems.forEach((item) => {
         if (!itemsGroupedBySeller[item.sellerEmail]) {
@@ -330,17 +327,14 @@ const CheckoutPage = () => {
 
       const sellerEmails = Object.keys(itemsGroupedBySeller);
 
-      // Create an order per seller
       const orderPromises = sellerEmails.map(async (sellerEmail) => {
         const items = itemsGroupedBySeller[sellerEmail];
 
-        // Calculate total amount for this seller
         const totalAmount = items.reduce(
           (acc, item) => acc + item.price * item.quantity,
           0
         );
 
-        // Calculate shipping once per seller based on first product and delivery charges
         let shipping = 0;
         const firstItem = items[0];
         const product = fetchedProducts.find((p) => {
@@ -384,7 +378,7 @@ const CheckoutPage = () => {
           shippingDetails: formData,
           deliveryNote: formData.deliveryNote,
           paymentMethod,
-          transactionId: ["bkash", "adminBkash"].includes(paymentMethod)
+          transactionId: ["upi", "adminUpi"].includes(paymentMethod)
             ? transactionId
             : null,
         };
@@ -407,14 +401,12 @@ const CheckoutPage = () => {
 
       await Promise.all(orderPromises);
 
-      // GA4 purchase event tracking
       if (typeof window !== "undefined" && window.gtag) {
         const cartTotal = cartItems.reduce(
           (acc, item) => acc + item.price * item.quantity,
           0
         );
 
-        // Calculate total shipping across unique sellers
         const uniqueSellers = new Set(
           cartItems.map((item) => item.sellerEmail)
         );
@@ -472,22 +464,7 @@ const CheckoutPage = () => {
     }
   };
 
-  // const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const selectedCity = e.target.value;
-  //   setFormData({ ...formData, city: selectedCity });
-  // };
-
-  // const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-  //   const selectedCity = e.target.value;
-  //   setFormData((prev) => ({ ...prev, city: selectedCity }));
-  // };
-
-  // const handleDistrictChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const selectedDistrict = e.target.value;
-  //   setFormData((prev) => ({ ...prev, district: selectedDistrict }));
-  // };
-
-  // Backend theke product fetch
+  // Fetch products from backend
   useEffect(() => {
     async function fetchProducts() {
       const productIds = [...new Set(cartItems.map((item) => item.productId))];
@@ -497,11 +474,11 @@ const CheckoutPage = () => {
           (id) =>
             fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/details/${id}`)
               .then((res) => res.json())
-              .then((data) => data?.data) // because response has { success, message, data }
+              .then((data) => data?.data)
         )
       );
 
-      setFetchedProducts(productsData.filter(Boolean)); // remove any undefined/null
+      setFetchedProducts(productsData.filter(Boolean));
     }
 
     if (cartItems.length > 0) {
@@ -523,7 +500,6 @@ const CheckoutPage = () => {
     console.log("🔍 Starting shipping cost calculation...");
     let totalShipping = 0;
 
-    // Calculate shipping once per unique seller (based on first product)
     const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
 
     uniqueSellers.forEach((sellerEmail) => {
@@ -552,7 +528,7 @@ const CheckoutPage = () => {
       const baseShipping =
         matchedCharge?.charge ?? matchedProduct.defaultDeliveryCharge ?? 0;
 
-      totalShipping += baseShipping; // Only one charge per seller
+      totalShipping += baseShipping;
     });
 
     const averageShipping =
@@ -569,24 +545,18 @@ const CheckoutPage = () => {
     const uniqueSellers = new Set(cartItems.map((item) => item.sellerEmail));
     const isMultipleSellers = uniqueSellers.size > 1;
 
-    const number = isMultipleSellers
-      ? "01405671742"
-      : sellerBkashNumber || "017XXXXXXXX";
+    const upiId = isMultipleSellers
+      ? "admin@upi"
+      : sellerUpiId || "example@upi";
 
-    setFinalBkashNumber(number);
-
-    // ✅ Admin Bkash হলে আলাদা ভাবে চিহ্নিত করা
-    // if (isMultipleSellers) {
-    //   setPaymentMethod("adminBkash");
-    // }
+    setFinalUpiId(upiId);
     setIsMultipleSellers(isMultipleSellers);
-  }, [cartItems, sellerBkashNumber]);
+  }, [cartItems, sellerUpiId]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(finalBkashNumber);
+    navigator.clipboard.writeText(finalUpiId);
     setCopied(true);
 
-    // Hide the tooltip after 1.5 seconds
     setTimeout(() => {
       setCopied(false);
     }, 1500);
@@ -605,379 +575,366 @@ const CheckoutPage = () => {
         <Loading />
       ) : (
         <>
-          <>
-            <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
-              Checkout
-            </h1>
+          <h1 className="text-4xl font-bold text-center mb-10 text-gray-800">
+            Checkout
+          </h1>
 
-            {/* First Order Discount Banner */}
-            <div className="bg-gradient-to-r from-blue-50 to-blue-200 text-blue-900 p-6 rounded-lg mb-8 text-center shadow-md">
-              <p className="text-2xl font-bold">
-                🎁 Enjoy 10% Off on Your First Purchase!
-              </p>
-              <p className="text-sm mt-2">
-                Unlock your exclusive discount by subscribing to our newsletter.
-                This special offer is only available to first-time customers.
-              </p>
-              <p className="text-sm mt-1 font-medium text-blue-800">
-                Sign up today and start saving!
-              </p>
-            </div>
+          <div className="bg-gradient-to-r from-blue-50 to-blue-200 text-blue-900 p-6 rounded-lg mb-8 text-center shadow-md">
+            <p className="text-2xl font-bold">
+              🎁 Enjoy 10% Off on Your First Purchase!
+            </p>
+            <p className="text-sm mt-2">
+              Unlock your exclusive discount by subscribing to our newsletter.
+              This special offer is only available to first-time customers.
+            </p>
+            <p className="text-sm mt-1 font-medium text-blue-800">
+              Sign up today and start saving!
+            </p>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Shipping Info Form */}
-              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-                  <User className="inline-block w-6 h-6 mr-2 text-blue-500" />
-                  Shipping Information / শিপিং তথ্য
-                </h2>
-                <div className="space-y-5">
-                  {/* Input Fields except District */}
-                  {[
-                    {
-                      id: "fullName",
-                      label: "Full Name / পুরো নাম",
-                      icon: <User className="w-5 h-5 text-gray-500" />,
-                    },
-                    {
-                      id: "phone",
-                      label: "Phone / ফোন",
-                      icon: <Phone className="w-5 h-5 text-gray-500" />,
-                    },
-                    {
-                      id: "email",
-                      label: "Email / ইমেইল",
-                      type: "email",
-                      icon: <Mail className="w-5 h-5 text-gray-500" />,
-                    },
-                    {
-                      id: "address",
-                      label: "Address / ঠিকানা",
-                      icon: <MapPin className="w-5 h-5 text-gray-500" />,
-                    },
-                  ].map(({ id, label, type = "text", icon }) => (
-                    <div key={id}>
-                      <label
-                        htmlFor={id}
-                        className="block text-sm font-medium text-gray-600 mb-1"
-                      >
-                        {label}
-                      </label>
-                      <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
-                        {icon}
-                        <input
-                          id={id}
-                          type={type}
-                          value={formData[id]}
-                          onChange={(e) =>
-                            setFormData({ ...formData, [id]: e.target.value })
-                          }
-                          className="w-full px-3 py-3 focus:outline-none"
-                        />
-                      </div>
-                      {!formData[id] && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {label} is required.
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                  {/* বিভাগ */}
-                  <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+              <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+                <User className="inline-block w-6 h-6 mr-2 text-blue-500" />
+                Shipping Information
+              </h2>
+              <div className="space-y-5">
+                {[
+                  {
+                    id: "fullName",
+                    label: "Full Name",
+                    icon: <User className="w-5 h-5 text-gray-500" />,
+                  },
+                  {
+                    id: "phone",
+                    label: "Phone",
+                    icon: <Phone className="w-5 h-5 text-gray-500" />,
+                  },
+                  {
+                    id: "email",
+                    label: "Email",
+                    type: "email",
+                    icon: <Mail className="w-5 h-5 text-gray-500" />,
+                  },
+                  {
+                    id: "address",
+                    label: "Address",
+                    icon: <MapPin className="w-5 h-5 text-gray-500" />,
+                  },
+                ].map(({ id, label, type = "text", icon }) => (
+                  <div key={id}>
                     <label
-                      htmlFor="division"
+                      htmlFor={id}
                       className="block text-sm font-medium text-gray-600 mb-1"
                     >
-                      Division / বিভাগ
+                      {label}
                     </label>
                     <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
-                      <MapPin className="w-5 h-5 text-gray-500" />
-                      <select
-                        id="division"
-                        value={formData.division}
-                        onChange={(e) => {
-                          const selectedDivision = e.target.value;
-                          setFormData((prev) => ({
-                            ...prev,
-                            division: selectedDivision,
-                            district: "", // just reset district when division changes
-                          }));
-                        }}
-                        className="w-full px-3 py-3 focus:outline-none bg-transparent"
-                      >
-                        <option value="">Select a division</option>
-                        {Object.keys(divisionDistrictMap).map((division) => (
-                          <option key={division} value={division}>
-                            {division}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {!formData.division && (
-                      <p className="text-xs text-red-500 mt-1">
-                        Division is required.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* District Field */}
-                  <div>
-                    <label
-                      htmlFor="district"
-                      className="block text-sm font-medium text-gray-600 mb-1"
-                    >
-                      District / জেলা
-                    </label>
-                    <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
-                      <MapPin className="w-5 h-5 text-gray-500" />
-                      <select
-                        id="district"
-                        value={formData.district}
+                      {icon}
+                      <input
+                        id={id}
+                        type={type}
+                        value={formData[id]}
                         onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            district: e.target.value,
-                          }))
-                        }
-                        disabled={!formData.division}
-                        className="w-full px-3 py-3 focus:outline-none bg-transparent"
-                      >
-                        <option value="">Select a district</option>
-                        {(divisionDistrictMap[formData.division] || []).map(
-                          (district) => (
-                            <option key={district} value={district}>
-                              {district}
-                            </option>
-                          )
-                        )}
-                      </select>
-                    </div>
-                    {!formData.district && (
-                      <p className="text-xs text-red-500 mt-1">
-                        District is required.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Delivery Note */}
-                  <div>
-                    <label
-                      htmlFor="deliveryNote"
-                      className="block text-sm font-medium text-gray-600 mb-1"
-                    >
-                      Delivery Note / ডেলিভারি নির্দেশনা
-                    </label>
-                    <div className="flex items-start border border-gray-300 rounded-md shadow-sm px-3">
-                      <StickyNote className="w-5 h-5 text-gray-500 mt-3" />
-                      <textarea
-                        id="deliveryNote"
-                        rows={4}
-                        value={formData.deliveryNote}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            deliveryNote: e.target.value,
-                          })
+                          setFormData({ ...formData, [id]: e.target.value })
                         }
                         className="w-full px-3 py-3 focus:outline-none"
-                        placeholder="Any specific instructions about delivery..."
                       />
                     </div>
-                    {!formData.deliveryNote && (
+                    {!formData[id] && (
                       <p className="text-xs text-red-500 mt-1">
-                        Delivery note is required.
+                        {label} is required.
                       </p>
                     )}
                   </div>
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-                  <ShoppingCart className="inline-block w-6 h-6 mr-2 text-green-600" />
-                  Order Summary / অর্ডার সারাংশ
-                </h2>
-
-                <div className="space-y-5">
-                  {cartItems.length > 0 ? (
-                    cartItems.map((item) => (
-                      <div
-                        key={item.productId}
-                        className="flex justify-between items-center bg-gray-50 p-4 rounded-lg"
-                      >
-                        <div className="flex items-center gap-4">
-                          <Image
-                            src={item.productImages[0]}
-                            alt={item.name}
-                            width={60}
-                            height={60}
-                            className="rounded-lg object-cover border border-gray-200"
-                            unoptimized
-                          />
-                          <div>
-                            <h4 className="font-medium text-gray-800">
-                              {item.name}
-                            </h4>
-                            <p className="text-sm text-gray-500">
-                              Color:{" "}
-                              <span className="capitalize">{item.color}</span> |
-                              Size:{" "}
-                              <span className="uppercase">{item.size}</span>
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="text-right">
-                          <p className="font-medium text-gray-700">
-                            {item.quantity} x ₹{item.price}
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={() => handleRemoveItem(item.productId)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X size={20} />
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500">
-                      No items in the cart. / কার্টে কোনো পণ্য নেই।
+                ))}
+                
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-gray-600 mb-1"
+                  >
+                    State
+                  </label>
+                  <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <select
+                      id="state"
+                      value={formData.state}
+                      onChange={(e) => {
+                        const selectedState = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          state: selectedState,
+                          district: "",
+                        }));
+                      }}
+                      className="w-full px-3 py-3 focus:outline-none bg-transparent"
+                      disabled={loadingStates}
+                    >
+                      <option value="">{loadingStates ? "Loading states..." : "Select a state"}</option>
+                      {states.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {!formData.state && (
+                    <p className="text-xs text-red-500 mt-1">
+                      State is required.
                     </p>
                   )}
                 </div>
-                {/* Payment Method Selection */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                    Payment Method / পেমেন্ট পদ্ধতি
-                  </h3>
 
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="cod"
-                        checked={paymentMethod === "cod"}
-                        onChange={() => setPaymentMethod("cod")}
-                        className="accent-blue-600"
-                      />
-                      Cash on Delivery / ক্যাশ অন ডেলিভারি
-                    </label>
-
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="bkash"
-                        checked={
-                          paymentMethod === "bkash" ||
-                          paymentMethod === "adminBkash"
-                        }
-                        onChange={() =>
-                          setPaymentMethod(
-                            isMultipleSellers ? "adminBkash" : "bkash"
-                          )
-                        }
-                        className="accent-blue-600"
-                      />
-                      Bkash Payment / বিকাশ পেমেন্ট
-                    </label>
+                <div>
+                  <label
+                    htmlFor="district"
+                    className="block text-sm font-medium text-gray-600 mb-1"
+                  >
+                    District
+                  </label>
+                  <div className="flex items-center border border-gray-300 rounded-md shadow-sm px-3">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <select
+                      id="district"
+                      value={formData.district}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          district: e.target.value,
+                        }))
+                      }
+                      disabled={!formData.state || loadingDistricts}
+                      className="w-full px-3 py-3 focus:outline-none bg-transparent"
+                    >
+                      <option value="">{loadingDistricts ? "Loading districts..." : "Select a district"}</option>
+                      {districts.map(
+                        (district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        )
+                      )}
+                    </select>
                   </div>
-
-                  {/* Show Bkash Payment Instructions */}
-                  {(paymentMethod === "bkash" ||
-                    paymentMethod === "adminBkash") && (
-                    <div className="mt-4 bg-pink-50 border border-pink-200 p-4 rounded-md shadow-sm">
-                      <p className="text-sm text-gray-800 mb-2 leading-6">
-                        📲 অনুগ্রহ করে মোট{" "}
-                        <span className="font-semibold text-pink-600">
-                          ₹{(totalAmount + shippingCost).toFixed(2)}
-                        </span>{" "}
-                        নিচের বিকাশ নম্বরে{" "}
-                        <span className="font-medium">Send Money</span> করুন।
-                      </p>
-
-                      {/* Bkash Number + Copy Button */}
-                      <div className="flex items-center gap-4 mt-2 relative w-full max-w-md flex-nowrap overflow-x-auto">
-                        <p className="text-base font-semibold text-pink-700 whitespace-nowrap">
-                          বিকাশ নম্বর:{" "}
-                          <span className="tracking-wide">
-                            {finalBkashNumber}
-                          </span>
-                        </p>
-
-                        <button
-                          onClick={handleCopy}
-                          className={`text-[10px] bg-pink-600 text-white px-3 py-1.5 rounded-md hover:bg-pink-700 transition whitespace-nowrap flex-shrink-0`}
-                          title={copied ? "কপি হয়েছে!" : "ক্লিক করে কপি করুন"}
-                        >
-                          {copied ? "✓ কপি হয়েছে" : "কপি করুন"}
-                        </button>
-                      </div>
-
-                      {/* Instruction Text */}
-                      <p className="text-sm text-gray-600 mt-3 leading-5">
-                        📝 পেমেন্ট সম্পন্ন হলে নিচের ঘরে আপনার{" "}
-                        <span className="font-medium">Transaction ID</span> দিন।
-                        <br />✅ অর্ডার কনফার্ম হওয়ার আগ পর্যন্ত চাইলে একটি
-                        স্ক্রিনশট রেখে দিতে পারেন।
-                      </p>
-
-                      {/* Transaction ID Input */}
-                      <div className="mt-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          আপনার বিকাশ Transaction ID:
-                        </label>
-                        <input
-                          type="text"
-                          value={transactionId}
-                          onChange={(e) => setTransactionId(e.target.value)}
-                          placeholder="Transaction ID লিখুন"
-                          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-pink-300"
-                        />
-                      </div>
-                    </div>
+                  {!formData.district && (
+                    <p className="text-xs text-red-500 mt-1">
+                      District is required.
+                    </p>
                   )}
                 </div>
 
-                <div className="mt-6 border-t pt-4 space-y-2 text-sm text-gray-700">
-                  <div className="flex justify-between">
-                    <span>Shipping / শিপিং</span>
-                    <span>{shippingCost}</span>
+                <div>
+                  <label
+                    htmlFor="deliveryNote"
+                    className="block text-sm font-medium text-gray-600 mb-1"
+                  >
+                    Delivery Note
+                  </label>
+                  <div className="flex items-start border border-gray-300 rounded-md shadow-sm px-3">
+                    <StickyNote className="w-5 h-5 text-gray-500 mt-3" />
+                    <textarea
+                      id="deliveryNote"
+                      rows={4}
+                      value={formData.deliveryNote}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          deliveryNote: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-3 focus:outline-none"
+                      placeholder="Any specific instructions about delivery..."
+                    />
                   </div>
-                  <div className="flex justify-between font-semibold text-lg">
-                    <span>Total / মোট</span>
-                    <span>₹{(totalAmount + shippingCost).toFixed(2)}</span>
-                  </div>
+                  {!formData.deliveryNote && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Delivery note is required.
+                    </p>
+                  )}
                 </div>
-
-                <button
-                  onClick={() => {
-                    if (
-                      !formData.fullName ||
-                      !formData.phone ||
-                      !formData.email ||
-                      !formData.address ||
-                      !formData.city ||
-                      !formData.district ||
-                      !formData.deliveryNote
-                    ) {
-                      toast.error("Please fill out all required fields.");
-                      return;
-                    }
-                    handleOrder();
-                  }}
-                  className="mt-6 w-full py-3 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
-                  disabled={loading}
-                >
-                  {loading ? "Placing Order..." : "Place Order / অর্ডার করুন"}
-                </button>
               </div>
             </div>
-          </>
+
+            <div className="bg-white p-8 rounded-xl shadow-md border border-gray-200">
+              <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+                <ShoppingCart className="inline-block w-6 h-6 mr-2 text-green-600" />
+                Order Summary
+              </h2>
+
+              <div className="space-y-5">
+                {cartItems.length > 0 ? (
+                  cartItems.map((item) => (
+                    <div
+                      key={item.productId}
+                      className="flex justify-between items-center bg-gray-50 p-4 rounded-lg"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src={item.productImages[0]}
+                          alt={item.name}
+                          width={60}
+                          height={60}
+                          className="rounded-lg object-cover border border-gray-200"
+                          unoptimized
+                        />
+                        <div>
+                          <h4 className="font-medium text-gray-800">
+                            {item.name}
+                          </h4>
+                          <p className="text-sm text-gray-500">
+                            Color:{" "}
+                            <span className="capitalize">{item.color}</span> |
+                            Size:{" "}
+                            <span className="uppercase">{item.size}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="font-medium text-gray-700">
+                          {item.quantity} x ₹{item.price}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => handleRemoveItem(item.productId)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500">
+                    No items in the cart.
+                  </p>
+                )}
+              </div>
+              
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  Payment Method
+                </h3>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === "cod"}
+                      onChange={() => setPaymentMethod("cod")}
+                      className="accent-blue-600"
+                    />
+                    Cash on Delivery
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="upi"
+                      checked={
+                        paymentMethod === "upi" ||
+                        paymentMethod === "adminUpi"
+                      }
+                      onChange={() =>
+                        setPaymentMethod(
+                          isMultipleSellers ? "adminUpi" : "upi"
+                        )
+                      }
+                      className="accent-blue-600"
+                    />
+                    UPI / Card Payment
+                  </label>
+                </div>
+
+                {(paymentMethod === "upi" ||
+                  paymentMethod === "adminUpi") && (
+                  <div className="mt-4 bg-pink-50 border border-pink-200 p-4 rounded-md shadow-sm">
+                    <p className="text-sm text-gray-800 mb-2 leading-6">
+                      📲 Please pay total{" "}
+                      <span className="font-semibold text-pink-600">
+                        ₹{(totalAmount + shippingCost).toFixed(2)}
+                      </span>{" "}
+                      using UPI or Card payment below.
+                    </p>
+
+                    <div className="flex items-center gap-4 mt-2 relative w-full max-w-md flex-nowrap overflow-x-auto">
+                      <p className="text-base font-semibold text-pink-700 whitespace-nowrap">
+                        UPI ID:{" "}
+                        <span className="tracking-wide">
+                          {finalUpiId}
+                        </span>
+                      </p>
+
+                      <button
+                        onClick={handleCopy}
+                        className={`text-[10px] bg-pink-600 text-white px-3 py-1.5 rounded-md hover:bg-pink-700 transition whitespace-nowrap flex-shrink-0`}
+                        title={copied ? "Copied!" : "Click to copy"}
+                      >
+                        {copied ? "✓ Copied" : "Copy"}
+                      </button>
+                    </div>
+
+                    <p className="text-sm text-gray-600 mt-3 leading-5">
+                      📝 After completing payment, enter your{" "}
+                      <span className="font-medium">Transaction ID</span> below.
+                      <br />✅ You may keep a screenshot until order confirmation.
+                    </p>
+
+                    <div className="mt-3">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Your UPI Transaction ID:
+                      </label>
+                      <input
+                        type="text"
+                        value={transactionId}
+                        onChange={(e) => setTransactionId(e.target.value)}
+                        placeholder="Enter UPI Transaction ID"
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-pink-300"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 border-t pt-4 space-y-2 text-sm text-gray-700">
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>{shippingCost}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg">
+                  <span>Total</span>
+                  <span>₹{(totalAmount + shippingCost).toFixed(2)}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (
+                    !formData.fullName ||
+                    !formData.phone ||
+                    !formData.email ||
+                    !formData.address ||
+                    !formData.city ||
+                    !formData.district ||
+                    !formData.deliveryNote
+                  ) {
+                    toast.error("Please fill out all required fields.");
+                    return;
+                  }
+                  handleOrder();
+                }}
+                className="mt-6 w-full py-3 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
+                disabled={loading}
+              >
+                {loading ? "Placing Order..." : "Place Order"}
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>

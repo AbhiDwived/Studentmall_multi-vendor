@@ -29,7 +29,7 @@ import Loading from "@/app/loading";
 import WithAuth from "@/app/lib/utils/withAuth";
 import clsx from "clsx";
 import SubscriptionSkeleton from "../components/skeletons/subscriptionSkeleton";
-import DebugInfo from "../components/DebugInfo";
+
 
 // Simple CountUp component fallback
 const CountUp = ({ to, duration, className }: { to: number; duration: number; className?: string }) => {
@@ -390,7 +390,6 @@ const SubscriptionSeller = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-10">
-      <DebugInfo />
       <Toaster position="top-center" />
 
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800">
@@ -640,8 +639,7 @@ const SubscriptionSeller = () => {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                সঠিক Transaction ID প্রদান করুন, ভুল ID দিলে যাচাই করা সম্ভব হবে
-                না।
+                Please provide the correct Transaction ID. Verification will not be possible with an incorrect ID.
               </p>
             </div>
 
@@ -708,13 +706,13 @@ const SubscriptionSeller = () => {
 
                     <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
                       <span>
-                        পেমেন্ট মেথড:{" "}
+                        Payment Method:{" "}
                         <span className="font-medium text-gray-700">
                           {req.paymentMethod.toUpperCase()}
                         </span>
                       </span>
                       <span className="flex items-center gap-2">
-                        ট্রাঞ্জেকশন:{" "}
+                        Transaction:{" "}
                         <span className="font-mono text-gray-900">
                           {req.transactionId}
                         </span>
@@ -730,7 +728,7 @@ const SubscriptionSeller = () => {
 
                     {req.status === "approved" && (
                       <p className="text-xs text-gray-500 mt-1">
-                        ✅ অনুমোদিত:{" "}
+                        ✅ Approved:{" "}
                         <span className="font-medium text-gray-700">
                           {updatedAt}
                         </span>

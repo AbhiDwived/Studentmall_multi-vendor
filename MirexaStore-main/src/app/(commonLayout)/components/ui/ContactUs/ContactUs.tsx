@@ -39,7 +39,7 @@ const ContactUs = () => {
     <section className="bg-gray-50 min-h-screen py-10">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-          Contact Us / আমাদের সাথে যোগাযোগ করুন
+          Contact Us
         </h1>
 
         <div className="bg-white shadow-lg rounded-2xl p-6">
@@ -51,7 +51,7 @@ const ContactUs = () => {
                   htmlFor="name"
                   className="block text-gray-800 font-semibold mb-1"
                 >
-                  Name / নাম
+                  Name
                 </label>
                 <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                   <div className="px-3 text-gray-500">
@@ -76,7 +76,7 @@ const ContactUs = () => {
                   htmlFor="email"
                   className="block text-gray-800 font-semibold mb-1"
                 >
-                  Email / ইমেইল
+                  Email
                 </label>
                 <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                   <div className="px-3 text-gray-500">
@@ -101,7 +101,7 @@ const ContactUs = () => {
                   htmlFor="message"
                   className="block text-gray-800 font-semibold mb-1"
                 >
-                  Message / বার্তা
+                  Message
                 </label>
                 <div className="flex items-start border border-gray-300 rounded-md overflow-hidden">
                   <div className="px-3 pt-3 text-gray-500">
@@ -131,7 +131,7 @@ const ContactUs = () => {
                 className="w-full mt-4 py-3 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 transition"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Submitting..." : "Send Message / বার্তা পাঠান"}
+                {isSubmitting ? "Submitting..." : "Send Message"}
               </button>
             </div>
           </form>

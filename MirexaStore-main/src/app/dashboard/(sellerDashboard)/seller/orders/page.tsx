@@ -387,7 +387,7 @@ const SellerOrders: React.FC = () => {
                   colSpan={7}
                   className="py-10 text-center text-gray-500 italic"
                 >
-                  কোনো অর্ডার পাওয়া যায়নি।
+                  No orders found.
                 </td>
               </tr>
             ) : (

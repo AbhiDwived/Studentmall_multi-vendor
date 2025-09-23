@@ -312,7 +312,7 @@ const OrderHistory: React.FC = () => {
                 <span className="font-medium text-gray-800">
                   {order.paymentMethod === "adminBkash" ||
                   order.paymentMethod === "admin"
-                    ? "bKash"
+                    ? "Digital Payment"
                     : order.paymentMethod === "cod"
                     ? "Cash on Delivery"
                     : order.paymentMethod || "N/A"}

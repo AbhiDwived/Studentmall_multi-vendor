@@ -6,7 +6,7 @@ type DeliveryCharge = {
   charge: number;
 };
 
-// Full Bangladesh Division → Districts mapping
+// Full India Division → Districts mapping
 const divisionDistricts: Record<string, string[]> = {
   Dhaka: [
     "Dhaka",

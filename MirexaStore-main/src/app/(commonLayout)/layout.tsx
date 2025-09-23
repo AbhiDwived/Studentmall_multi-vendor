@@ -5,25 +5,25 @@ import ClickSparkWrapper from "./components/reactbit/ClickSparkWrapper/ClickSpar
 
 export const metadata: Metadata = {
   title:
-    "Studentmall | Best Online Shopping in Bangladesh – Fashion, Electronics & More",
+    "Studentmall | Best Online Shopping in India – Fashion, Electronics & More",
   description:
-    "Buy top-quality electronics, fashion, home decor, and more online from Studentmall. Trusted online shopping in Bangladesh with fast delivery, secure payment & great prices.",
+    "Buy top-quality electronics, fashion, home decor, and more online from Studentmall. Trusted online shopping in India with fast delivery, secure payment & great prices.",
 
   keywords: [
-    "online shopping Bangladesh",
+    "online shopping India",
     "Studentmall",
     "buy electronics online",
     "fashion store BD",
     "home essentials BD",
-    "best online store Bangladesh",
-    "gadget store Bangladesh",
+    "best online store India",
+    "gadget store India",
     "online fashion shop BD",
   ],
 
   openGraph: {
-    title: "Studentmall | Best Online Shopping in Bangladesh",
+    title: "Studentmall | Best Online Shopping in India",
     description:
-      "Shop at MirexaStore – Bangladesh’s most trusted destination for electronics, fashion, and daily essentials. Quality guaranteed. Fast shipping nationwide.",
+      "Shop at MirexaStore – India’s most trusted destination for electronics, fashion, and daily essentials. Quality guaranteed. Fast shipping nationwide.",
     url: process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "https://studentmall.com",
     siteName: "Studentmall",
     images: [
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
         url: "https://res.cloudinary.com/dwg8d0bfp/image/upload/v1751225263/mirexastore_dksqoq.png", // ✅ Your provided logo
         width: 800,
         height: 800,
-        alt: "Studentmall Logo – Online Shopping Bangladesh",
+        alt: "Studentmall Logo – Online Shopping India",
       },
     ],
     type: "website",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Studentmall | Trusted Online Store in Bangladesh",
+    title: "Studentmall | Trusted Online Store in India",
     description:
       "Electronics, fashion, home & lifestyle – discover everything at MirexaStore. Fast shipping, easy checkout, and amazing deals await.",
     images: [
