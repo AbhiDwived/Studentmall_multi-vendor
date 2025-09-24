@@ -159,6 +159,20 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
                 <Store size={16} className="text-[#EA580C]" />
                 Brands
               </Link>
+              <Link
+                href="/dashboard/seller/slugs"
+                className={linkStyle("/dashboard/seller/slugs")}
+              >
+                <Tags size={16} className="text-[#EA580C]" />
+                Slugs
+              </Link>
+              <Link
+                href="/dashboard/seller/subslugs"
+                className={linkStyle("/dashboard/seller/subslugs")}
+              >
+                <Tags size={16} className="text-[#EA580C]" />
+                SubSlugs
+              </Link>
             </div>
           </div>
 

@@ -12,6 +12,8 @@ import { RoutesForSeller } from "../modules/sellerRequest/sellerRequest.route";
 import { CourierRoutes } from "../modules/courier/courier.route";
 import { SubscriptionRoutes } from "../modules/subscription/subscription.route";
 import { BrandRoutes } from "../modules/brand/brand.route";
+import { SlugRoutes } from "../modules/slug/slug.route";
+import { SubSlugRoutes } from "../modules/subslug/subslug.route";
 const router = Router();
 
 const moduleRoutes = [
@@ -70,9 +72,15 @@ const moduleRoutes = [
   {
     path: "/brand",
     route: BrandRoutes
+  },
+  {
+    path: "/slug",
+    route: SlugRoutes
+  },
+  {
+    path: "/subslug",
+    route: SubSlugRoutes
   }
-
-
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
