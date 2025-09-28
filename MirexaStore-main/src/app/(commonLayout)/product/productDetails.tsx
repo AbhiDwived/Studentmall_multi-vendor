@@ -63,6 +63,7 @@ interface ProductDetailsProps {
       relatedProducts?: string[];
       freeShipping?: boolean;
       returnPolicy?: string;
+      finalPrice?: number;
 
       // Advanced Features
       innerSlug?: string;
@@ -275,7 +276,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
 
   // Initialize variants on component mount
   useEffect(() => {
-    if (product?.data?.variants?.length > 0) {
+    if (product?.data?.variants && product.data.variants.length > 0) {
       const firstVariant = product.data.variants.find(v => v.innerSlug) || product.data.variants[0];
       if (firstVariant) {
         setVariantState({
@@ -424,7 +425,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     
     // Handle variant pricing with proper field names from backend
     const variantBasePrice = (variant as any).baseprice || variant.basePrice || variant.price || product.data.price;
-    const variantFinalPrice = (variant as any).finalprice || variant.finalPrice || variant.price || product.data.finalPrice || product.data.discountPrice || product.data.price;
+    const variantFinalPrice = (variant as any).finalprice || variant.finalPrice || variant.price || product.data.discountPrice || product.data.price;
     
     setDynamicProductDetails({
       sku: variant.sku || `product-#${Math.random().toString(36).substr(2, 6)}-${variant.innerSlug ?? 'default'}`,
@@ -437,7 +438,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       weight: variant.weight ?? product.data.weight ?? 0,
       images: variant.images ?? product.data.productImages,
       description: variant.variantDescription ?? 
-        (variant.specification?.length > 0 
+        (variant.specification && variant.specification.length > 0 
           ? `${product.data.description} - ${variant.innerSlug?.toUpperCase() ?? ''} ${variant.innerSubSlug?.toUpperCase() ?? ''} variant with ${variant.specification.map(spec => spec.value).join(', ')}.`
           : product.data.description),
       specifications: combinedSpecs
@@ -736,7 +737,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       return;
     }
 
-    const totalPrice = variantState.price ?? product.data.finalPrice ?? product.data.discountPrice ?? product.data.price;
+    const totalPrice = variantState.price ?? product.data.discountPrice ?? product.data.price;
     const stockQuantityToUse = variantState.stock ?? product.data.stockQuantity;
 
     const cartItem = {
@@ -779,7 +780,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       return;
     }
 
-    const priceToUse = variantState.price ?? product.data.finalPrice ?? product.data.discountPrice ?? product.data.price;
+    const priceToUse = variantState.price ?? product.data.discountPrice ?? product.data.price;
     const stockToUse = variantState.stock ?? product.data.stockQuantity;
 
     const cartItem = {
