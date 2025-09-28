@@ -12,17 +12,41 @@ const productSchema = new Schema<TProduct>(
 		// Basic Fields
 		name: { type: String, required: true, trim: true },
 		description: { type: String, required: true },
+		longDescription: { type: String },
 		price: { type: Number, required: true, min: 0 },
+		discount: { type: Number },
+		discountPrice: { type: Number, min: 0 },
+		discountPercentage: { type: Number, min: 0, max: 100 },
+		finalPrice: { type: Number, min: 0 },
 		stockQuantity: { type: Number, required: true, min: 0, default: 0 },
 		category: { type: String, required: true, trim: true },
-		longDescription: { type: String },
+		brand: { type: String, trim: true },
 		materials: { type: String, trim: true },
-		careInstructions: { type: String, trim: true },
-		specifications: { type: String, trim: true },
-		additionalInfo: { type: String, trim: true },
+		
+		specifications: [
+			{
+				key: { type: String, trim: true },
+				value: { type: String, trim: true },
+			},
+		],
 
-		// Recommended Fields
-		slug: { type: String, required: true, unique: true, trim: true },
+		// ✅ Essential E-commerce Fields
+		sku: { type: String, unique: true, trim: true, sparse: true },
+		lowStockThreshold: { type: Number, default: 10, min: 0 },
+		trackInventory: { type: Boolean, default: true },
+		viewCount: { type: Number, default: 0, min: 0 },
+		wishlistCount: { type: Number, default: 0, min: 0 },
+		relatedProducts: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
+		freeShipping: { type: Boolean, default: false },
+		returnPolicy: { type: String, trim: true },
+		packingStandard: { type: String, trim: true },
+
+		// ✅ Slug / SEO
+		slug: { type: Schema.Types.ObjectId, ref: 'Slug', required: false },
+		subSlug: { type: Schema.Types.ObjectId, ref: 'SubSlug', required: false },
+		urlSlug: { type: String, trim: true, index: true },
+
+		// ✅ Product Type
 		type: {
 			type: String,
 			enum: ['own', 'affiliate'],
@@ -30,25 +54,41 @@ const productSchema = new Schema<TProduct>(
 			default: 'own',
 		},
 		affiliateLink: { type: String },
-		discountPrice: { type: Number, default: 0, min: 0 },
-		brand: { type: String, trim: true },
+
 		tags: { type: [String], default: [] },
 
-		// ✅ Variants
+		// ✅ Enhanced Variants
 		variants: [
 			{
-				color: { type: String },
-				size: { type: String },
+				innerSlug: { type: String, required: false },
+				innerSubSlug: { type: String, required: false },
+				color: { type: String, required: false },
+				size: { type: String, required: false },
+				baseprice: { type: Number, required: true },
+				discount: { type: Number },
+				finalprice: { type: Number, required: true },
+				stock: { type: Number, default: 0 },
+				description: { type: String, default: 'This is a sample variant description' },
+				variantDescription: { type: String, default: '' },
+				specification: [
+					{
+						key: String,
+						value: String,
+					},
+				],
 				sku: { type: String, trim: true },
 				price: { type: Number, min: 0 },
-				stock: { type: Number, min: 0, default: 0 },
 				images: {
 					type: [String],
-					validate: [
-						arrayOfValidUrls,
-						'Please provide valid URLs for variant images',
-					],
+					default: [],
+					validate: {
+						validator: function(value: string[]) {
+							return value.length === 0 || arrayOfValidUrls(value);
+						},
+						message: 'Please provide valid URLs for variant images'
+					}
 				},
+				weight: { type: Number, default: 0, min: 0 },
 			},
 		],
 
@@ -60,7 +100,7 @@ const productSchema = new Schema<TProduct>(
 		},
 		videoUrl: { type: String, trim: true },
 
-		// ✅ Delivery Charges by District and Upazila
+		// ✅ Delivery Charges
 		deliveryCharges: {
 			type: [
 				{
@@ -71,21 +111,14 @@ const productSchema = new Schema<TProduct>(
 			],
 			default: [],
 		},
+		defaultDeliveryCharge: { type: Number, default: 0, min: 0 },
 
-		defaultDeliveryCharge: {
-			type: Number,
-			default: 0,
-			min: 0,
-		},
-
-
-
-		// ✅ Reviews and Ratings
+		// ✅ Reviews & Ratings
 		reviews: [{ type: Schema.Types.ObjectId, ref: 'Review' }],
 		rating: { type: Number, default: 0, min: 0, max: 5 },
 		totalReviews: { type: Number, default: 0 },
 
-		// ✅ Product Status & Labels
+		// ✅ Status & Labels
 		status: {
 			type: String,
 			enum: ['active', 'inactive', 'draft'],
@@ -94,7 +127,7 @@ const productSchema = new Schema<TProduct>(
 		isFeatured: { type: Boolean, default: false },
 		isNewArrival: { type: Boolean, default: false },
 
-		// ✅ Seller
+		// ✅ Seller Info
 		sellerId: { type: Schema.Types.ObjectId, ref: 'User' },
 		sellerName: { type: String, trim: true },
 		sellerEmail: { type: String, trim: true },
@@ -115,18 +148,20 @@ const productSchema = new Schema<TProduct>(
 			enum: ['admin', 'seller', null],
 			default: null,
 		},
-		isDeleted: {
-			type: Boolean,
-			default: false,
-		},
+		isDeleted: { type: Boolean, default: false },
 	},
 	{ timestamps: true }
 );
 
 // ✅ Indexing
 productSchema.index({ category: 1 });
-productSchema.index({ brand: 1 });
 productSchema.index({ 'variants.sku': 1 });
+productSchema.index({ slug: 1 }, { sparse: true });
+productSchema.index({ subSlug: 1 }, { sparse: true });
+productSchema.index({ status: 1 });
+productSchema.index({ sellerId: 1 });
+productSchema.index({ isFeatured: 1 });
+productSchema.index({ isNewArrival: 1 });
 
 // ✅ Create Model
 const Product = model<TProduct>('Product', productSchema);

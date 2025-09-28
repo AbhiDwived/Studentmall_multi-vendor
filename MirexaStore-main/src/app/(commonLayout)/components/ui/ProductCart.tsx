@@ -9,19 +9,123 @@ import { Pagination } from "@heroui/react";
 import { Star } from "lucide-react";
 import ProductCardSkeleton from "../skeleton/ProductCardSkeleton";
 
-export type Product = {
-  stockQuantity: number;
-  stock: number;
+// Enhanced Product Type with all new backend model fields
+export interface Specification {
+  key: string;
+  value: string;
+}
+
+export interface ProductVariant {
+  color?: string;
+  size?: string;
+  sku?: string;
+  price?: number;
+  stock?: number;
+  images?: string[];
+  weight?: number;
+  innerSlug?: string;
+  innerSubSlug?: string;
+  basePrice?: number;
+  discount?: number;
+  finalPrice?: number;
+  defaultDescription?: string;
+  variantDescription?: string;
+  specifications?: Specification[];
+}
+
+export interface Slug {
   _id: string;
   name: string;
-  category: string;
+  slug: string;
+  description?: string;
+}
+
+export interface SubSlug {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentSlug: string;
+}
+
+export type Product = {
+  _id: string;
+  name: string;
+  description: string;
   price: number;
+  stockQuantity: number;
+  stock: number;
+  category: string;
+  longDescription?: string;
+  materials?: string;
+  careInstructions?: string;
+  specifications?: Specification[];
+  additionalInfo?: string;
+
+  // Essential E-commerce Fields
+  sku?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  lowStockThreshold?: number;
+  trackInventory?: boolean;
+  viewCount?: number;
+  wishlistCount?: number;
+  relatedProducts?: string[];
+  freeShipping?: boolean;
+  returnPolicy?: string;
+
+  // Advanced Features
+  innerSlug?: string;
+  innerSubSlug?: string;
+  defaultDescription?: string;
+  variantDescription?: string;
+  addedBy?: string;
+
+  // Slug System
+  slug: string | Slug;
+  subSlug?: SubSlug;
+  urlSlug?: string;
+  
+  // Product Settings
+  type?: 'own' | 'affiliate';
+  affiliateLink?: string;
   discountPrice?: number;
   brand?: string;
+  tags?: string[];
+
+  // Variants
+  variants?: ProductVariant[];
+
+  // Images and Media
   productImages: string[];
-  slug: string;
-  averageRating?: number;
+  videoUrl?: string;
+
+  // Reviews and Ratings
+  rating?: number;
   totalReviews?: number;
+  averageRating?: number;
+
+  // Status
+  status?: 'active' | 'inactive' | 'draft';
+  isFeatured?: boolean;
+  isNewArrival?: boolean;
+
+  // Seller Info
+  sellerId?: string;
+  sellerName?: string;
+  sellerEmail?: string;
+  sellerNumber?: number;
+
+  // Additional Details
+  features?: string[];
+  notes?: string;
+  weight?: number;
+  dimensions?: string;
+  warranty?: string;
+
+  // System Fields
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type ProductCartProps = {
@@ -38,9 +142,12 @@ const ProductCart = ({ products }: ProductCartProps) => {
 
   const totalPages = Math.ceil(products.length / productsPerPage);
 
-  const handleSeeDetails = (slug: string) => {
+  const handleSeeDetails = (product: Product) => {
     setLoading(true);
-    router.push(`/product/${slug}`);
+    // Use urlSlug if available, otherwise generate from name
+    const generateSlug = (name: string) => name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    const finalSlug = (product as any).urlSlug || generateSlug(product.name);
+    router.push(`/product/${finalSlug}`);
   };
 
   const calculateDiscountPercentage = (
@@ -82,7 +189,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
                     className="bg-white border rounded-lg overflow-hidden shadow hover:shadow-md transition cursor-pointer"
                     whileHover={{ scale: 1.03 }}
                     transition={{ duration: 0.3 }}
-                    onClick={() => handleSeeDetails(product.slug)}
+                    onClick={() => handleSeeDetails(product)}
                   >
                     {/* Image Area */}
                     <div className="relative w-full h-44 bg-white flex items-center justify-center">

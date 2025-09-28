@@ -238,7 +238,7 @@ const AdminProductPage = () => {
               <tr key={product._id} className="border-b hover:bg-gray-50">
                 <td className="py-3 px-4 text-sm text-gray-800">
                   <Link
-                    href={`/product/${product.slug}`}
+                    href={`/product/${product.urlSlug || product._id}`}
                     className="block hover:underline text-gray-800"
                   >
                     <div className="text-sm py-3 px-4">

@@ -86,7 +86,7 @@ export default function SubSlugsPage() {
         }, config);
       } else {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/subslug`, {
-          name: formData.name,
+          name: formData.slug,
           parentSlug: formData.parentSlug,
           description: formData.description,
           innerSubSlugs: formData.innerSubSlugs,
@@ -127,7 +127,7 @@ export default function SubSlugsPage() {
       name: subSlug.name,
       slug: subSlug.slug,
       description: subSlug.description || "",
-      parentSlug: subSlug.parentSlug._id,
+      parentSlug: subSlug.parentSlug?._id || '',
       innerSubSlugs: subSlug.innerSubSlugs || [],
       status: subSlug.status,
     });
@@ -138,7 +138,7 @@ export default function SubSlugsPage() {
   const filteredSubSlugs = subSlugs.filter(subSlug =>
     subSlug.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     subSlug.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    subSlug.parentSlug.name.toLowerCase().includes(searchTerm.toLowerCase())
+    (subSlug.parentSlug && subSlug.parentSlug.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (loading) {
@@ -187,7 +187,7 @@ export default function SubSlugsPage() {
             {filteredSubSlugs.map((subSlug) => (
               <tr key={subSlug._id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{subSlug.slug}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subSlug.parentSlug.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subSlug.parentSlug?.name || 'No Parent'}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">{subSlug.description || "-"}</td>
                 <td className="px-6 py-4 text-sm text-gray-500">
                   {subSlug.innerSubSlugs && subSlug.innerSubSlugs.length > 0 ? (

@@ -47,28 +47,35 @@ const SellerSidebar = ({ isOpen, setIsOpen }: SellerSidebarProps) => {
 
   useEffect(() => {
     const fetchSellerProfile = async () => {
-      if (!user?.email || user.role !== "seller") return;
+      if (!user?.email || user.role !== "seller") {
+        setSellerSlug(null);
+        return;
+      }
 
       try {
         const res = await axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`,
-          { validateStatus: (status) => status < 500 } // Don't throw on 404
+          { 
+            validateStatus: (status) => status < 500,
+            timeout: 5000
+          }
         );
         
-        if (res.status === 200) {
-          setSellerSlug(res.data?.data?.brand?.slug || null);
+        if (res.status === 200 && res.data?.success) {
+          setSellerSlug(res.data.data?.brand?.slug || null);
         } else {
           setSellerSlug(null);
         }
       } catch (error: any) {
-        // Only log unexpected errors (server errors, network issues)
+        setSellerSlug(null);
+        // Only log server errors, ignore 404s
         if (error.response?.status >= 500) {
           console.error('Server error fetching seller profile:', error);
         }
-        setSellerSlug(null);
       }
     };
 
+    // Only fetch once when component mounts
     fetchSellerProfile();
   }, [user?.email, user?.role]);
 

@@ -23,7 +23,6 @@ export default function SlugsPage() {
   const [editingSlug, setEditingSlug] = useState<Slug | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [formData, setFormData] = useState({
-    name: "",
     slug: "",
     description: "",
     innerSlugs: [] as string[],
@@ -60,26 +59,23 @@ export default function SlugsPage() {
       
       if (editingSlug) {
         console.log('Updating slug with:', {
-          name: formData.name,
           description: formData.description,
           innerSlugs: formData.innerSlugs,
           status: formData.status
         });
         await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/slug/${editingSlug._id}`, {
-          name: formData.name,
           description: formData.description,
           innerSlugs: formData.innerSlugs,
           status: formData.status
         }, config);
       } else {
         console.log('Creating slug with:', {
-          name: formData.name,
           description: formData.description,
           innerSlugs: formData.innerSlugs,
           status: formData.status
         });
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/slug`, {
-          name: formData.name,
+          name: formData.slug,
           description: formData.description,
           innerSlugs: formData.innerSlugs,
           status: formData.status
@@ -109,7 +105,7 @@ export default function SlugsPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", slug: "", description: "", innerSlugs: [], status: true });
+    setFormData({ slug: "", description: "", innerSlugs: [], status: true });
     setEditingSlug(null);
     setShowModal(false);
   };
@@ -117,14 +113,12 @@ export default function SlugsPage() {
   const handleEdit = (slug: Slug) => {
     console.log("Editing slug:", slug);
     setFormData({
-      name: slug.name,
       slug: slug.slug,
       description: slug.description || "",
       innerSlugs: slug.innerSlugs || [],
       status: slug.status,
     });
     console.log("Form data set to:", {
-      name: slug.name,
       slug: slug.slug,
       description: slug.description || "",
       innerSlugs: slug.innerSlugs || [],
@@ -173,7 +167,7 @@ export default function SlugsPage() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Slug Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inner Slugs</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>

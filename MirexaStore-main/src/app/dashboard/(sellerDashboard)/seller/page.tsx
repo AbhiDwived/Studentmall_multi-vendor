@@ -59,13 +59,17 @@ const SellerAnalytics = () => {
         const token = localStorage.getItem("accessToken");
         if (!token) {
           setError("No token found. Please log in.");
+          setLoading(false);
           return;
         }
 
         const response = await Axios.get(
           `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
           }
         );
 
@@ -187,9 +191,16 @@ const SellerAnalytics = () => {
         });
 
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        setError("Failed to fetch orders. Please try again.");
+        if (err.response?.status === 401) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("user");
+          setError("Session expired. Please log in again.");
+          window.location.href = "/login";
+        } else {
+          setError("Failed to fetch orders. Please try again.");
+        }
         setLoading(false);
       }
     };

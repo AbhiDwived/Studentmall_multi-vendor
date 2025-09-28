@@ -41,8 +41,9 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
   );
 
   // Navigate to product details page
-  const handleSeeDetails = (slug: string) => {
-    router.push(`/product/${slug}`);
+  const handleSeeDetails = (product: Product) => {
+    const urlSlug = (product as any).urlSlug || product._id;
+    router.push(`/product/${urlSlug}`);
   };
 
   return (
@@ -57,7 +58,7 @@ const RelatedProduct = ({ relatedProducts }: RelatedProductProps) => {
             <motion.div
               key={product._id}
               className="card bg-base-100 shadow-md rounded-lg overflow-hidden cursor-pointer"
-              onClick={() => handleSeeDetails(product.slug)}
+              onClick={() => handleSeeDetails(product)}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             >

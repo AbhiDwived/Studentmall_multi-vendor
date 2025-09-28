@@ -1,228 +1,371 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
-import Axios from "axios";
-import Image from "next/image";
 import { RootState } from "@/app/lib/redux/store";
-import Loading from "@/app/loading";
-import ProfileSkeleton from "../components/skeletons/ProfileSkeleton";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import WithAuth from "@/app/lib/utils/withAuth";
 
-const ProfilePage = () => {
-  const router = useRouter();
+const SellerProfile = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
   const token = useSelector((state: RootState) => state.auth.token);
-
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [brandProfile, setBrandProfile] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+  const [profileData, setProfileData] = useState({
+    userEmail: user?.email || "",
+    brand: {
+      name: "",
+      slug: "",
+      logo: "",
+      banner: "",
+      tagline: "",
+      description: "",
+      location: "",
+      phone: "",
+      whatsapp: "",
+      bkash: "",
+      socialLinks: {
+        facebook: "",
+        instagram: "",
+      },
+    },
+  });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!token) {
-        router.push("/login");
-        return;
+    checkExistingProfile();
+  }, [user?.email]);
+
+  const checkExistingProfile = async () => {
+    if (!user?.email) return;
+
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`,
+        { validateStatus: (status) => status < 500 }
+      );
+
+      if (response.status === 200 && response.data?.success) {
+        setHasProfile(true);
+        setProfileData(response.data.data);
       }
+    } catch (error) {
+      setHasProfile(false);
+    }
+  };
 
-      try {
-        const userResponse = await Axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    if (name.startsWith('brand.')) {
+      const field = name.split('.')[1];
+      setProfileData(prev => ({
+        ...prev,
+        brand: { ...prev.brand, [field]: value }
+      }));
+    } else if (name.startsWith('socialLinks.')) {
+      const field = name.split('.')[1];
+      setProfileData(prev => ({
+        ...prev,
+        brand: { 
+          ...prev.brand, 
+          socialLinks: { ...prev.brand.socialLinks, [field]: value }
+        }
+      }));
+    } else {
+      setProfileData(prev => ({ ...prev, [name]: value }));
+    }
+  };
 
-        const user = userResponse.data.data;
-        setUserProfile(user);
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').trim('-');
+  };
 
-        if (user?.email) {
-          try {
-            const sellerResponse = await Axios.get(
-              `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user.email}`
-            );
+  const handleBrandNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setProfileData(prev => ({
+      ...prev,
+      brand: {
+        ...prev.brand,
+        name,
+        slug: generateSlug(name)
+      }
+    }));
+  };
 
-            if (sellerResponse?.data?.data?.brand) {
-              setBrandProfile(sellerResponse?.data?.data);
-            }
-          } catch {
-            console.warn("No seller brand data found.");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/seller/create-profile`,
+        profileData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch profile. Please try again.");
-      } finally {
-        setLoading(false);
+      );
+
+      if (response.status === 201) {
+        toast.success("✅ Seller profile created successfully!");
+        setHasProfile(true);
+        // Refresh the page to update sidebar
+        window.location.reload();
       }
-    };
+    } catch (error: any) {
+      console.error('Error creating profile:', error);
+      toast.error(error.response?.data?.message || "❌ Failed to create profile");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProfile();
-  }, [token, router]);
-
-  if (loading) return <ProfileSkeleton></ProfileSkeleton>;
-
-  if (error)
-    return <div className="text-center py-10 text-red-500">{error}</div>;
+  if (hasProfile) {
+    return (
+      <div className="p-8 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Seller Profile</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Brand Name</label>
+            <p className="mt-1 text-lg text-gray-900">{profileData.brand.name}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Brand Slug</label>
+            <p className="mt-1 text-lg text-blue-600">{profileData.brand.slug}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Store URL</label>
+            <p className="mt-1 text-lg text-green-600">
+              {window.location.origin}/store/{profileData.brand.slug}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-        My Profile
-      </h1>
-
-      {brandProfile?.brand ? (
-        <div className="bg-white shadow-xl rounded-2xl p-8 space-y-6 hover:shadow-2xl transition duration-300">
-          <div className="w-full rounded-xl overflow-hidden shadow">
-            <Image
-              src={brandProfile.brand.banner}
-              alt="Brand Banner"
-              width={1200}
-              height={300}
-              className="w-full h-60 object-cover"
-            />
-          </div>
-
-          <div className="flex flex-col items-center text-center space-y-4">
-            <Image
-              src={brandProfile.brand.logo}
-              alt="Brand Logo"
-              width={112}
-              height={112}
-              className="rounded-full object-contain border p-1 shadow"
-            />
-            <div>
-              <h2 className="text-2xl font-semibold">
-                {brandProfile.brand.name}
-              </h2>
-              <p className="text-sm text-gray-500">
-                {brandProfile.brand.tagline}
-              </p>
-            </div>
-            <div className="text-sm text-gray-600">
-              {brandProfile.brand.location}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <ProfileItem label="Email" value={brandProfile.userEmail} />
-            <ProfileItem label="Phone" value={brandProfile.brand.phone} />
-            <ProfileItem label="WhatsApp" value={brandProfile.brand.whatsapp} />
-
-            <ProfileItem
-              label="Verified"
-              value={
-                <span
-                  className={`inline-block px-2 py-1 text-xs rounded-full font-medium ${
-                    brandProfile.brand.verified
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {brandProfile.brand.verified ? "Verified" : "Not Verified"}
-                </span>
-              }
-            />
-            <ProfileItem
-              label="Joined"
-              value={new Date(brandProfile.brand.joinedAt).toLocaleDateString()}
+    <div className="p-8 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
+      <ToastContainer />
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Create Seller Profile</h2>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-700">Brand Information</h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand Name *
+            </label>
+            <input
+              type="text"
+              name="brand.name"
+              value={profileData.brand.name}
+              onChange={handleBrandNameChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your brand name"
             />
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-700">
-              About the Brand
-            </h3>
-            <p className="text-gray-600 leading-relaxed">
-              {brandProfile.brand.description}
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand Slug (Auto-generated)
+            </label>
+            <input
+              type="text"
+              name="brand.slug"
+              value={profileData.brand.slug}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="brand-slug"
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Your store will be available at: /store/{profileData.brand.slug}
             </p>
+          </div>
 
-            <div className="flex gap-4 mt-4">
-              {brandProfile.brand.socialLinks?.facebook && (
-                <a
-                  href={brandProfile.brand.socialLinks.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-blue-600 hover:underline font-medium"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M22 12a10 10 0 1 0-11.5 9.95v-7.05H8v-2.9h2.5V9.4c0-2.5 1.49-3.9 3.77-3.9 1.1 0 2.25.2 2.25.2v2.5h-1.27c-1.26 0-1.65.78-1.65 1.57v1.9h2.8l-.45 2.9h-2.35v7.05A10 10 0 0 0 22 12z" />
-                  </svg>
-                  Facebook
-                </a>
-              )}
-              {brandProfile.brand.socialLinks?.instagram && (
-                <a
-                  href={brandProfile.brand.socialLinks.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-pink-500 hover:underline font-medium"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M7.5 2h9A5.5 5.5 0 0 1 22 7.5v9a5.5 5.5 0 0 1-5.5 5.5h-9A5.5 5.5 0 0 1 2 16.5v-9A5.5 5.5 0 0 1 7.5 2Zm0 2A3.5 3.5 0 0 0 4 7.5v9A3.5 3.5 0 0 0 7.5 20h9a3.5 3.5 0 0 0 3.5-3.5v-9A3.5 3.5 0 0 0 16.5 4h-9Zm4.5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5Zm4.75-3.75a1.25 1.25 0 1 1-1.25 1.25 1.25 1.25 0 0 1 1.25-1.25Z" />
-                  </svg>
-                  Instagram
-                </a>
-              )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand Description *
+            </label>
+            <textarea
+              name="brand.description"
+              value={profileData.brand.description}
+              onChange={handleInputChange}
+              required
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Describe your brand"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brand Tagline
+            </label>
+            <input
+              type="text"
+              name="brand.tagline"
+              value={profileData.brand.tagline}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="A catchy tagline for your brand"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location *
+            </label>
+            <input
+              type="text"
+              name="brand.location"
+              value={profileData.brand.location}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Your business location"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Logo URL *
+            </label>
+            <input
+              type="url"
+              name="brand.logo"
+              value={profileData.brand.logo}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com/logo.png"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Banner URL *
+            </label>
+            <input
+              type="url"
+              name="brand.banner"
+              value={profileData.brand.banner}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://example.com/banner.png"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number *
+              </label>
+              <input
+                type="tel"
+                name="brand.phone"
+                value={profileData.brand.phone}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Phone number"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                WhatsApp Number *
+              </label>
+              <input
+                type="tel"
+                name="brand.whatsapp"
+                value={profileData.brand.whatsapp}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="WhatsApp number"
+              />
             </div>
           </div>
 
-          <button className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition">
-            Edit Profile
-          </button>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              bKash Number *
+            </label>
+            <input
+              type="tel"
+              name="brand.bkash"
+              value={profileData.brand.bkash}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="bKash number for payments"
+            />
+          </div>
         </div>
-      ) : (
-        userProfile && (
-          <div className="bg-white shadow-xl rounded-2xl p-8 hover:shadow-2xl transition duration-300">
-            <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 text-3xl font-bold shadow">
-                {userProfile.name?.charAt(0).toUpperCase()}
-              </div>
 
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <ProfileItem label="Full Name" value={userProfile.name} />
-                <ProfileItem label="Email Address" value={userProfile.email} />
-                <ProfileItem label="Phone Number" value={userProfile.phone} />
-                <ProfileItem label="Address" value={userProfile.address} />
-                <ProfileItem label="Account Role" value={userProfile.role} />
-              </div>
-            </div>
-
-            <button className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition">
-              Edit Profile
-            </button>
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-700">Social Media Links</h3>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Facebook Page *
+            </label>
+            <input
+              type="url"
+              name="socialLinks.facebook"
+              value={profileData.brand.socialLinks.facebook}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://facebook.com/yourpage"
+            />
           </div>
-        )
-      )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Instagram Profile *
+            </label>
+            <input
+              type="url"
+              name="socialLinks.instagram"
+              value={profileData.brand.socialLinks.instagram}
+              onChange={handleInputChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="https://instagram.com/yourprofile"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-3 px-4 rounded-md font-medium ${
+            loading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700'
+          } text-white transition-colors`}
+        >
+          {loading ? 'Creating Profile...' : 'Create Seller Profile'}
+        </button>
+      </form>
     </div>
   );
 };
 
-const ProfileItem = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | JSX.Element;
-}) => (
-  <div className="flex flex-col">
-    <span className="text-sm text-gray-500 font-medium">{label}</span>
-    <span className="text-base font-semibold text-gray-800">
-      {value || "N/A"}
-    </span>
-  </div>
-);
-
-export default ProfilePage;
+export default function ProtectedPage() {
+  return (
+    <WithAuth requiredRoles={["seller"]}>
+      <SellerProfile />
+    </WithAuth>
+  );
+}

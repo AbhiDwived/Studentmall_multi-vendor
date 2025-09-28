@@ -103,11 +103,21 @@ const getInactiveAndDraftProducts = catchAsync(
 const getProductBySlug = async (req: Request, res: Response) => {
 	try {
 		const { slug } = req.params;
+		console.log('Looking for product with slug:', slug);
 		const product = await ProductService.getProductBySlug(slug);
-		res.status(200).json({ data: product });
+		console.log('Found product:', product ? product.name : 'Not found');
+		res.status(200).json({ 
+			success: true,
+			message: 'Product retrieved successfully',
+			data: product 
+		});
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} catch (error: any) {
-		res.status(404).json({ message: error.message });
+		console.log('Error finding product:', error.message);
+		res.status(404).json({ 
+			success: false,
+			message: error.message 
+		});
 	}
 };
 
@@ -200,6 +210,155 @@ const updateProductStatus = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+// New controller methods for enhanced functionality
+const updateVariantStock = catchAsync(async (req: Request, res: Response) => {
+	const { productId, variantIndex } = req.params;
+	const { stock } = req.body;
+
+	if (typeof stock !== 'number' || stock < 0) {
+		return res.status(httpStatus.BAD_REQUEST).json({
+			success: false,
+			message: 'Stock must be a non-negative number',
+		});
+	}
+
+	const updatedProduct = await ProductService.updateVariantStock(
+		productId,
+		parseInt(variantIndex),
+		stock
+	);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Variant stock updated successfully',
+		data: updatedProduct,
+	});
+});
+
+const getLowStockProducts = catchAsync(async (req: Request, res: Response) => {
+	const products = await ProductService.getLowStockProducts();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Low stock products retrieved successfully',
+		data: products,
+	});
+});
+
+
+
+const incrementWishlistCount = catchAsync(async (req: Request, res: Response) => {
+	const { id } = req.params;
+
+	const updatedProduct = await ProductService.incrementWishlistCount(id);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Wishlist count incremented successfully',
+		data: updatedProduct,
+	});
+});
+
+// New controller methods for enhanced functionality
+const getProductBySKU = catchAsync(async (req: Request, res: Response) => {
+	const { sku } = req.params;
+
+	const product = await ProductService.getProductsBySKU(sku);
+
+	if (!product) {
+		return res.status(httpStatus.NOT_FOUND).json({
+			success: false,
+			message: 'Product not found with this SKU',
+		});
+	}
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Product retrieved by SKU successfully',
+		data: product,
+	});
+});
+
+const getProductsByBrand = catchAsync(async (req: Request, res: Response) => {
+	const { brand } = req.params;
+
+	const products = await ProductService.getProductsByBrand(brand);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Products retrieved by brand successfully',
+		data: products,
+	});
+});
+
+const getFeaturedProducts = catchAsync(async (req: Request, res: Response) => {
+	const products = await ProductService.getFeaturedProducts();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Featured products retrieved successfully',
+		data: products,
+	});
+});
+
+const getNewArrivals = catchAsync(async (req: Request, res: Response) => {
+	const products = await ProductService.getNewArrivals();
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'New arrival products retrieved successfully',
+		data: products,
+	});
+});
+
+const getProductsByUrlSlug = catchAsync(async (req: Request, res: Response) => {
+	const { urlSlug } = req.params;
+
+	if (!urlSlug || typeof urlSlug !== 'string' || urlSlug.trim().length === 0) {
+		return res.status(httpStatus.BAD_REQUEST).json({
+			success: false,
+			message: 'URL slug is required and must be a valid string',
+		});
+	}
+
+	const product = await ProductService.getProductByUrlSlug(urlSlug.trim());
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: 'Product retrieved by URL slug successfully',
+		data: product,
+	});
+});
+
+const bulkUpdateProductStatus = catchAsync(async (req: Request, res: Response) => {
+	const { productIds, status } = req.body;
+
+	const validStatuses = ['active', 'inactive', 'draft'];
+	if (!validStatuses.includes(status)) {
+		return res.status(httpStatus.BAD_REQUEST).json({
+			success: false,
+			message: 'Invalid status value. Must be one of: active, inactive, draft.',
+		});
+	}
+
+	const updatedProducts = await ProductService.bulkUpdateProductStatus(productIds, status);
+
+	sendResponse(res, {
+		statusCode: httpStatus.OK,
+		success: true,
+		message: `Products status updated to ${status}`,
+		data: updatedProducts,
+	});
+});
+
 export const ProductController = {
 	createProduct,
 	getProductBySlug,
@@ -214,5 +373,14 @@ export const ProductController = {
 	getSearchSuggestions,
 	deleteProduct,
 	getRelatedProducts,
-	updateProductStatus
+	updateProductStatus,
+	updateVariantStock,
+	getLowStockProducts,
+	incrementWishlistCount,
+	getProductBySKU,
+	getProductsByBrand,
+	getFeaturedProducts,
+	getNewArrivals,
+	getProductsByUrlSlug,
+	bulkUpdateProductStatus
 };

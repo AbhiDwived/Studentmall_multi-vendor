@@ -11,7 +11,10 @@ const createReview = async (reviewData: TReview) => {
 	// Link the review to the product
 	const product = await Product.findById(reviewData.productId);
 	if (product) {
-		// Ensure the product's reviews array is updated with an ObjectId
+		// Ensure the product's reviews array exists and is updated with an ObjectId
+		if (!product.reviews) {
+			product.reviews = [];
+		}
 		product.reviews.push(newReview._id); // _id is already an ObjectId, no need for further conversion
 		await product.save();
 	}

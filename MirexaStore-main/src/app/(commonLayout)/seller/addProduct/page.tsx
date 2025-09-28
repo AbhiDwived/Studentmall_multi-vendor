@@ -43,35 +43,69 @@ const generateSlug = (name: string) =>
     .replace(/[^\w-]+/g, "");
 
 // Interfaces
-interface ProductData {
+interface Slug {
+  _id: string;
   name: string;
   slug: string;
+  description?: string;
+  innerSlugs?: string[];
+}
+
+interface SubSlug {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentSlug: string;
+  innerSubSlugs?: string[];
+}
+
+interface ProductData {
+  name: string;
   description: string;
   longDescription: string;
-  materials: string;
-  careInstructions: string;
-  specifications: string;
-  additionalInfo: string;
-  weight: number;
-  warranty: string;
-  sellerEmail: string;
   price: number;
-  discountPrice: number;
+  discount: number;
   stockQuantity: number;
   category: string;
   brand: string;
-  videoUrl: string;
+  materials: string;
+  specifications: string;
+  sku: string;
+  lowStockThreshold: number;
+  trackInventory: boolean;
+  freeShipping: boolean;
+  returnPolicy: string;
+  urlSlug: string;
   type: "own" | "affiliate";
   affiliateLink?: string;
+  videoUrl: string;
+  defaultDeliveryCharge: number;
+  weight: number;
+  dimensions: string;
+  warranty: string;
+  notes: string;
+  sellerEmail: string;
+  slug?: string;
+  subSlug?: string;
 }
 
 interface Variant {
-  sku: string;
+  innerSlug?: string;
+  innerSubSlug?: string;
   color: string;
   size: string;
+  baseprice: number;
+  discount?: number;
+  finalprice: number;
   stock: number;
+  description: string;
+  variantDescription: string;
+  specification: Array<{ key: string; value: string }>;
+  sku: string;
   price: number;
   images: string[];
+  weight: number;
 }
 
 export type DeliveryCharge = {
@@ -107,23 +141,30 @@ const AddProduct = () => {
   const [slugEdited, setSlugEdited] = useState(false);
   const [productData, setProductData] = useState<ProductData>({
     name: "",
-    slug: "",
     description: "",
     longDescription: "",
-    materials: "",
-    careInstructions: "",
-    specifications: "",
-    additionalInfo: "",
-    weight: 0,
-    warranty: "",
-    sellerEmail: "",
     price: 0,
-    discountPrice: 0,
+    discount: 0,
     stockQuantity: 0,
     category: "",
     brand: "",
-    videoUrl: "",
+    materials: "",
+    specifications: "",
+    sku: "",
+    lowStockThreshold: 10,
+    trackInventory: true,
+    freeShipping: false,
+    returnPolicy: "",
+    urlSlug: "",
     type: "own",
+    affiliateLink: "",
+    videoUrl: "",
+    defaultDeliveryCharge: 0,
+    weight: 0,
+    dimensions: "",
+    warranty: "",
+    notes: "",
+    sellerEmail: "",
   });
 
   const [productImages, setProductImages] = useState<string[]>([]);
@@ -134,7 +175,6 @@ const AddProduct = () => {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
-  const [brandSlug, setBrandSlug] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [currentColor, setCurrentColor] = useState("#ff0000");
@@ -144,6 +184,11 @@ const AddProduct = () => {
     DeliveryCharge[]
   >([]);
   const [defaultDeliveryCharge, setDefaultDeliveryCharge] = React.useState(0);
+  const [slugs, setSlugs] = useState<Slug[]>([]);
+  const [subSlugs, setSubSlugs] = useState<SubSlug[]>([]);
+  const [selectedSlug, setSelectedSlug] = useState<string>("");
+  const [selectedSubSlug, setSelectedSubSlug] = useState<string>("");
+  const [filteredSubSlugs, setFilteredSubSlugs] = useState<SubSlug[]>([]);
 
   const handleDeliveryChange = (
     charges: DeliveryCharge[],
@@ -151,6 +196,59 @@ const AddProduct = () => {
   ) => {
     setDeliveryCharges(charges);
     setDefaultDeliveryCharge(defaultCharge);
+  };
+
+  // Fetch slugs and subslugs on component mount
+  useEffect(() => {
+    const fetchSlugsAndSubSlugs = async () => {
+      try {
+        console.log('Fetching slugs and subslugs...');
+        const [slugsResponse, subSlugsResponse] = await Promise.all([
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/slug`),
+          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/subslug`)
+        ]);
+        
+        console.log('Slugs Response:', slugsResponse.data);
+        console.log('SubSlugs Response:', subSlugsResponse.data);
+        
+        // Handle the API response structure like in slug management page
+        const slugsData = slugsResponse.data.result === "Done" ? slugsResponse.data.data : [];
+        const subSlugsData = subSlugsResponse.data.result === "Done" ? subSlugsResponse.data.data : [];
+        
+        console.log('Processed Slugs:', slugsData);
+        console.log('Processed SubSlugs:', subSlugsData);
+        
+        setSlugs(slugsData);
+        setSubSlugs(subSlugsData);
+      } catch (error) {
+        console.error('Error fetching slugs and subslugs:', error);
+        toast.error('Failed to load slug options');
+      }
+    };
+
+    fetchSlugsAndSubSlugs();
+  }, []);
+
+  // Filter subslugs based on selected slug
+  useEffect(() => {
+    if (selectedSlug) {
+      const filtered = subSlugs.filter(subSlug => subSlug.parentSlug === selectedSlug);
+      setFilteredSubSlugs(filtered);
+      setSelectedSubSlug(""); // Reset subslug selection when slug changes
+    } else {
+      setFilteredSubSlugs([]);
+      setSelectedSubSlug("");
+    }
+  }, [selectedSlug, subSlugs]);
+
+  const handleSlugChange = (slugId: string) => {
+    setSelectedSlug(slugId);
+    setProductData(prev => ({ ...prev, slug: slugId }));
+  };
+
+  const handleSubSlugChange = (subSlugId: string) => {
+    setSelectedSubSlug(subSlugId);
+    setProductData(prev => ({ ...prev, subSlug: subSlugId }));
   };
   //colour select
 
@@ -163,39 +261,26 @@ const AddProduct = () => {
   const removeColor = (color: string) => {
     setColors(colors.filter((c) => c !== color));
   };
-  useEffect(() => {
-    const fetchBrandSlug = async () => {
-      try {
-        const { data } = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/seller/profile/${user?.email}`
-        );
-        console.log("data", data);
-        setBrandSlug(data?.data?.brand?.slug); // set the brand slug
-        console.log("Brand Slug:", data?.data?.brand?.slug);
-      } catch (error) {
-        console.error("Failed to fetch brand slug:", error);
-      }
-    };
-
-    if (user?.email) {
-      fetchBrandSlug();
-    }
-  }, [user?.email]);
 
   useEffect(() => {
-    if (!slugEdited) {
+    if (!slugEdited && productData.name) {
+      const newSlug = productData.name
+        .toLowerCase()
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "");
+      
       setProductData((prev) => ({
         ...prev,
-        slug: `${brandSlug}-${generateSlug(prev.name)}`,
+        urlSlug: newSlug,
       }));
     }
-  }, [brandSlug, productData.name, slugEdited]);
+  }, [productData.name, slugEdited]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-    if (name === "slug") setSlugEdited(true);
+    if (name === "urlSlug") setSlugEdited(true);
     setProductData((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
@@ -215,11 +300,27 @@ const AddProduct = () => {
     setter((prev: string[]) => prev.filter((_, idx) => idx !== index));
 
   const handleVariantChange = (color: string, size: string) => {
-    const sku = generateSKU(productData.slug, color, size);
+    const sku = generateSKU(productData.name, color, size);
     if (!variants.some((v) => v.color === color && v.size === size)) {
       setVariants((prev) => [
         ...prev,
-        { sku, color, size, stock: 0, price: productData.price, images: [] },
+        { 
+          sku, 
+          color, 
+          size, 
+          baseprice: productData.price,
+          discount: 0,
+          finalprice: productData.price,
+          stock: 0, 
+          price: productData.price, 
+          images: [],
+          description: "This is a sample variant description",
+          variantDescription: "",
+          specification: [],
+          weight: 0,
+          innerSlug: "",
+          innerSubSlug: ""
+        },
       ]);
     }
   };
@@ -242,23 +343,32 @@ const AddProduct = () => {
   const resetForm = () => {
     setProductData({
       name: "",
-      slug: "",
       description: "",
       longDescription: "",
-      materials: "",
-      careInstructions: "",
-      specifications: "",
-      additionalInfo: "",
-      weight: 0,
-      warranty: "",
-      sellerEmail: "",
       price: 0,
-      discountPrice: 0,
+      discount: 0,
       stockQuantity: 0,
       category: "",
       brand: "",
-      videoUrl: "",
+      materials: "",
+      specifications: "",
+      sku: "",
+      lowStockThreshold: 10,
+      trackInventory: true,
+      freeShipping: false,
+      returnPolicy: "",
+      urlSlug: "",
       type: "own",
+      affiliateLink: "",
+      videoUrl: "",
+      defaultDeliveryCharge: 0,
+      weight: 0,
+      dimensions: "",
+      warranty: "",
+      notes: "",
+      sellerEmail: "",
+      slug: "",
+      subSlug: "",
     });
     setProductImages([]);
     setTags([""]);
@@ -289,12 +399,10 @@ const AddProduct = () => {
 
     const finalData = {
       ...productData,
-      category: finalCategory, // Add the final category here
+      category: finalCategory,
       type: productData.affiliateLink ? "affiliate" : "own",
       productImages,
       tags,
-      colors,
-      sizes,
       features,
       isFeatured,
       isNewArrival,
@@ -304,7 +412,25 @@ const AddProduct = () => {
       sellerNumber,
       deliveryCharges,
       defaultDeliveryCharge,
+      slug: selectedSlug || undefined,
+      subSlug: selectedSubSlug || undefined,
+      specifications: productData.specifications ? 
+        productData.specifications.split(',').map(spec => {
+          const [key, value] = spec.split(':');
+          return { key: key?.trim() || '', value: value?.trim() || '' };
+        }).filter(spec => spec.key && spec.value) : [],
+      status: 'draft',
+      viewCount: 0,
+      wishlistCount: 0,
+      rating: 0,
+      totalReviews: 0,
+      reviews: [],
+      relatedProducts: [],
+      deletedBy: null,
+      isDeleted: false
     };
+    
+    delete finalData.slug;
 
     setLoading(true);
 
@@ -326,6 +452,9 @@ const AddProduct = () => {
         // Reset Category States
         setSelectedCategory("");
         setCustomCategory("");
+        setSelectedSlug("");
+        setSelectedSubSlug("");
+        setFilteredSubSlugs([]);
       } else {
         throw new Error(response.data.message);
       }
@@ -487,7 +616,7 @@ const AddProduct = () => {
           </h4>
           <div className="flex gap-4 items-center">
             <input
-              value={generateSKU(productData.slug, color, size)}
+              value={generateSKU(productData.name, color, size)}
               disabled
               className="p-3 border border-gray-300 rounded-md w-full"
             />
@@ -500,45 +629,89 @@ const AddProduct = () => {
             </button>
           </div>
           {variants.some((v) => v.color === color && v.size === size) && (
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              <input
-                type="number"
-                placeholder="Stock"
-                onChange={(e) =>
-                  updateVariantField(
-                    color,
-                    size,
-                    "stock",
-                    Number(e.target.value)
-                  )
-                }
-                className="p-3 border border-gray-300 rounded-md"
-              />
-              <input
-                type="number"
-                placeholder="Price"
-                onChange={(e) =>
-                  updateVariantField(
-                    color,
-                    size,
-                    "price",
-                    Number(e.target.value)
-                  )
-                }
-                className="p-3 border border-gray-300 rounded-md"
-              />
-              <input
-                type="text"
-                placeholder="Images (comma separated)"
-                onChange={(e) =>
-                  updateVariantField(
-                    color,
-                    size,
-                    "images",
-                    e.target.value.split(",")
-                  )
-                }
-                className="p-3 border border-gray-300 rounded-md"
+            <div className="mt-4 space-y-4">
+              {/* Slug and SubSlug Selection for Variant */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Inner Slug
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => updateVariantSlugField(color, size, "innerSlug", e.target.value)}
+                    disabled={!selectedSlug}
+                  >
+                    <option value="">Select Inner Slug</option>
+                    {selectedSlug && slugs.find(s => s._id === selectedSlug)?.innerSlugs?.map((innerSlug, index) => (
+                      <option key={index} value={innerSlug}>
+                        {innerSlug}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Inner SubSlug
+                  </label>
+                  <select
+                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onChange={(e) => updateVariantSlugField(color, size, "innerSubSlug", e.target.value)}
+                    disabled={!selectedSubSlug}
+                  >
+                    <option value="">Select Inner SubSlug</option>
+                    {selectedSubSlug && filteredSubSlugs.find(s => s._id === selectedSubSlug)?.innerSubSlugs?.map((innerSubSlug, index) => (
+                      <option key={index} value={innerSubSlug}>
+                        {innerSubSlug}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="number"
+                  placeholder="Stock"
+                  onChange={(e) => updateVariantField(color, size, "stock", Number(e.target.value))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="number"
+                  placeholder="Base Price"
+                  onChange={(e) => updateVariantField(color, size, "baseprice", Number(e.target.value))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="number"
+                  placeholder="Discount %"
+                  onChange={(e) => updateVariantField(color, size, "discount", Number(e.target.value))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="number"
+                  placeholder="Final Price"
+                  onChange={(e) => updateVariantField(color, size, "finalprice", Number(e.target.value))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="number"
+                  step="0.1"
+                  placeholder="Weight (kg)"
+                  onChange={(e) => updateVariantField(color, size, "weight", Number(e.target.value))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+                <input
+                  type="text"
+                  placeholder="Images (comma separated URLs)"
+                  onChange={(e) => updateVariantField(color, size, "images", e.target.value.split(",").map(url => url.trim()).filter(url => url))}
+                  className="p-3 border border-gray-300 rounded-md"
+                />
+              </div>
+              <textarea
+                placeholder="Variant Description"
+                onChange={(e) => updateVariantField(color, size, "variantDescription", e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-md"
+                rows={3}
               />
             </div>
           )}
@@ -556,8 +729,8 @@ const AddProduct = () => {
         </div>
         {renderInputField("Product Name", "name", "text", Tag, "#F6550C", true)}
         {renderInputField(
-          "Slug (Editable)",
-          "slug",
+          "URL Slug (Editable)",
+          "urlSlug",
           "text",
           Sliders,
           "#F6550C",
@@ -691,6 +864,92 @@ const AddProduct = () => {
         )}
 
         {renderInputField("Brand", "brand", "text", Tag, "#F6550C")}
+        {renderInputField("SKU", "sku", "text", Archive, "#F6550C")}
+        
+        {/* Slug Selection */}
+        <div className="flex flex-col gap-1">
+          <label className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
+            Slug ({slugs.length} available)
+          </label>
+          <select
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200"
+            value={selectedSlug}
+            onChange={(e) => handleSlugChange(e.target.value)}
+          >
+            <option value="">Select Slug</option>
+            {slugs.map((slug) => {
+              console.log('Rendering slug:', slug);
+              return (
+                <option key={slug._id} value={slug._id}>
+                  {slug.name}
+                </option>
+              );
+            })}
+          </select>
+          {slugs.length === 0 && (
+            <p className="text-sm text-red-500 mt-1">
+              No slugs found. Please create some slugs first.
+            </p>
+          )}
+        </div>
+
+        {/* Sub Slug Selection */}
+        <div className="flex flex-col gap-1">
+          <label className="font-semibold text-gray-800 mb-1 flex items-center gap-1">
+            Sub Slug ({filteredSubSlugs.length} available)
+          </label>
+          <select
+            className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all duration-200"
+            value={selectedSubSlug}
+            onChange={(e) => handleSubSlugChange(e.target.value)}
+            disabled={!selectedSlug || filteredSubSlugs.length === 0}
+          >
+            <option value="">Select Sub Slug</option>
+            {filteredSubSlugs.map((subSlug) => {
+              console.log('Rendering subslug:', subSlug);
+              return (
+                <option key={subSlug._id} value={subSlug._id}>
+                  {subSlug.name}
+                </option>
+              );
+            })}
+          </select>
+          {selectedSlug && filteredSubSlugs.length === 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              No sub slugs available for the selected slug
+            </p>
+          )}
+          {subSlugs.length === 0 && (
+            <p className="text-sm text-red-500 mt-1">
+              No subslugs found. Please create some subslugs first.
+            </p>
+          )}
+        </div>
+        {renderInputField("Low Stock Threshold", "lowStockThreshold", "number", Archive, "#F6550C")}
+        {renderInputField("Return Policy", "returnPolicy", "text", Shield, "#F6550C")}
+        {renderInputField("Dimensions", "dimensions", "text", Box, "#F6550C")}
+        {renderInputField("Notes", "notes", "text", FileText, "#F6550C")}
+        {renderInputField("Default Delivery Charge", "defaultDeliveryCharge", "number", DollarSign, "#F6550C")}
+        
+        <div className="flex gap-6">
+          <label className="flex items-center gap-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={productData.trackInventory}
+              onChange={(e) => setProductData(prev => ({...prev, trackInventory: e.target.checked}))}
+            />
+            Track Inventory
+          </label>
+          <label className="flex items-center gap-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={productData.freeShipping}
+              onChange={(e) => setProductData(prev => ({...prev, freeShipping: e.target.checked}))}
+            />
+            Free Shipping
+          </label>
+        </div>
+        
         {renderInputField("Video URL", "videoUrl", "text", Video, "#F6550C")}
         {renderArrayField(
           "Product Images",

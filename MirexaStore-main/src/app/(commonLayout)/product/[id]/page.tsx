@@ -9,7 +9,15 @@ export async function generateMetadata({ params }: { params: tParams }) {
   const { id } = await params;
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${id}`);
+    // Check if id is a valid ObjectId (24 character hex string) or a URL slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    
+    // Use appropriate endpoint based on whether it's an ID or slug
+    const apiUrl = isObjectId 
+      ? `${process.env.NEXT_PUBLIC_API_URL}/product/${id}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/product/url-slug/${id}`;
+      
+    const res = await fetch(apiUrl);
     if (!res.ok) {
       return {
         title: "Product Not Found - MirexaStore",
@@ -26,6 +34,7 @@ export async function generateMetadata({ params }: { params: tParams }) {
       description:
         product.description?.slice(0, 160) ||
         "Explore premium products from MirexaStore.",
+      keywords: product.tags?.join(', ') || '',
       openGraph: {
         title: product.name,
         description: product.description,
@@ -52,8 +61,17 @@ const ProductPage = async ({ params }: { params: tParams }) => {
   const { id } = await params;
 
   try {
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/product/${id}`;
-    const response = await fetch(apiUrl);
+    // Check if id is a valid ObjectId (24 character hex string) or a URL slug
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    
+    // Use appropriate endpoint based on whether it's an ID or slug
+    const apiUrl = isObjectId 
+      ? `${process.env.NEXT_PUBLIC_API_URL}/product/${id}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/product/url-slug/${id}`;
+      
+    const response = await fetch(apiUrl, {
+      next: { revalidate: 300 } // Cache for 5 minutes
+    });
 
     if (!response.ok) {
       notFound();
@@ -62,29 +80,40 @@ const ProductPage = async ({ params }: { params: tParams }) => {
 
     const productData = await response.json();
 
-    if (!productData || !productData.data || !productData.data.category) {
-      notFound(); // Instead of throwing an error, redirect to notFound
-      return; // Ensure the function exits here
+    if (!productData || !productData.data) {
+      notFound();
+      return;
     }
+    
+    // Ensure the product data has the expected structure
+    const product = {
+      ...productData,
+      data: {
+        ...productData.data,
+        category: productData.data.category || 'Electronics'
+      }
+    };
 
-    const relatedProductsUrl = `${process.env.NEXT_PUBLIC_API_URL}/product/category/${productData.data.category}`;
-    const relatedProductsResponse = await fetch(relatedProductsUrl);
+    const relatedProductsUrl = `${process.env.NEXT_PUBLIC_API_URL}/product/category/${product.data.category}`;
+    const relatedProductsResponse = await fetch(relatedProductsUrl, {
+      next: { revalidate: 600 } // Cache for 10 minutes
+    });
 
     const relatedProducts = relatedProductsResponse.ok
       ? await relatedProductsResponse.json()
       : { data: [] };
 
     // ✅ Filter out the current product
-    const currentProductId = productData.data._id;
+    const currentProductId = product.data._id;
     const relatedProductsData =
       relatedProducts?.data?.filter(
-        (product: any) => product._id !== currentProductId
+        (prod: any) => prod._id !== currentProductId
       ) || [];
 
     return (
       <>
         <ProductDetails
-          product={productData}
+          product={product}
           relatedProducts={relatedProductsData}
         />
 

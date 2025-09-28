@@ -39,6 +39,13 @@ interface ProductData {
   category: string;
   brand: string;
   videoUrl: string;
+  // New enhanced fields
+  sku: string;
+  metaTitle: string;
+  metaDescription: string;
+  lowStockThreshold: number;
+  returnPolicy: string;
+  freeShipping: boolean;
 }
 
 interface Variant {
@@ -48,6 +55,13 @@ interface Variant {
   stock: number;
   price: number;
   images: string[];
+  // Enhanced variant pricing
+  basePrice: number;
+  discount: number;
+  finalPrice: number;
+  weight: number;
+  defaultDescription: string;
+  variantDescription: string;
 }
 
 const AddProduct = () => {
@@ -71,6 +85,13 @@ const AddProduct = () => {
     category: "",
     brand: "",
     videoUrl: "",
+    // New enhanced fields
+    sku: "",
+    metaTitle: "",
+    metaDescription: "",
+    lowStockThreshold: 10,
+    returnPolicy: "",
+    freeShipping: false,
   });
 
   const [productImages, setProductImages] = useState<string[]>([""]);
@@ -371,6 +392,13 @@ const AddProduct = () => {
         {renderInputField("Category", "category")}
         {renderInputField("Brand", "brand")}
         {renderInputField("Video URL", "videoUrl")}
+        
+        {/* Enhanced Fields */}
+        {renderInputField("SKU", "sku")}
+        {renderInputField("Meta Title", "metaTitle")}
+        {renderInputField("Meta Description", "metaDescription")}
+        {renderInputField("Low Stock Threshold", "lowStockThreshold", "number")}
+        {renderInputField("Return Policy", "returnPolicy")}
 
         {renderArrayField("Product Images", productImages, setProductImages)}
         {renderArrayField("Tags", tags, setTags)}
@@ -394,6 +422,14 @@ const AddProduct = () => {
               onChange={(e) => setIsNewArrival(e.target.checked)}
             />
             New Arrival
+          </label>
+          <label className="flex items-center gap-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={productData.freeShipping}
+              onChange={(e) => setProductData(prev => ({...prev, freeShipping: e.target.checked}))}
+            />
+            Free Shipping
           </label>
         </div>
 

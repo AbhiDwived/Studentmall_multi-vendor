@@ -28,6 +28,9 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
 	// Link the review to the product (if needed)
 	const product = await Product.findById(productId);
 	if (product) {
+		if (!product.reviews) {
+			product.reviews = [];
+		}
 		product.reviews.push(newReview._id); // Add the review's _id to the product's reviews array
 		await product.save();
 	}

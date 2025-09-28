@@ -25,7 +25,7 @@ const FooterClientLinks = () => {
     <>
       {/* Customer Service */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
+        <h3 className="text-lg font-semibold mb-4 footer-heading">Customer Service</h3>
 
         <ul className="space-y-2 text-sm">
           <li>
@@ -91,7 +91,7 @@ const FooterClientLinks = () => {
 
       {/* Quick Links */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+        <h3 className="text-lg font-semibold mb-4 footer-heading">Quick Links</h3>
         <ul className="space-y-2 text-sm">
           <li>
             <Link href="/" className="flex items-center gap-2 hover:underline">
@@ -117,7 +117,7 @@ const FooterClientLinks = () => {
         </ul>
       </div>
       <div>
-        <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
+        <h3 className="text-lg font-semibold mb-4 footer-heading">Get in Touch</h3>
         <p className="text-sm mb-2">📞 +91 8433208146</p>
         <p className="text-sm mb-4">✉️ abhidwivedi687@gmail.com</p>
 
