@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Hind_Siliguri } from "next/font/google";
 import "./globals.css";
-import Providers from "./lib/Providers";
+import Providers from "@/app/lib/Providers";
 import Script from "next/script";
 import ClickSparkWrapper from "./(commonLayout)/components/reactbit/ClickSparkWrapper/ClickSparkWrapper";
 
@@ -50,9 +50,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         {/* Google Analytics 4 - load lazily */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-RWY5TMX717"
-          strategy="lazyOnload"
-          async
-          defer
+          strategy="afterInteractive"
         />
         <Script id="ga4-init" strategy="lazyOnload">
           {`

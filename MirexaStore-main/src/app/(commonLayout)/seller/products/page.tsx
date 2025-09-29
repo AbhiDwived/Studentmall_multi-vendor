@@ -7,7 +7,7 @@ import { toast, ToastContainer } from "react-toastify"; // Import Toastify
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationModal";
 import Loading from "@/app/loading";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import Link from "next/link";

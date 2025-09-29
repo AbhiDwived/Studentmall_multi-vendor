@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Loading from "@/app/loading";
+import Loading from "../../../loading";
 import { useSelector } from "react-redux";
-import { RootState } from "@/app/lib/redux/store";
-import WithAuth from "@/app/lib/utils/withAuth";
+import { RootState } from "../../../lib/redux/store";
+import WithAuth from "../../../lib/utils/withAuth";
 
 // ✅ SKU generator
 const generateSKU = (slug: string, color: string, size: string) =>

@@ -1,5 +1,5 @@
 "use client";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import Loading from "@/app/loading";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";

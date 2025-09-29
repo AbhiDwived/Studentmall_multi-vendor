@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import Loading from "@/app/loading";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import clsx from "clsx";
 import CountUp from "../../components/reactbit/CountUp/CountUp";
 

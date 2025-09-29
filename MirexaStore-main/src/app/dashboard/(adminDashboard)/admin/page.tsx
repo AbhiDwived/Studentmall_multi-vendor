@@ -1,6 +1,6 @@
 "use client";
 
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import { useEffect, useState } from "react";
 import Axios from "axios";
 import { FaDollarSign, FaBox, FaChartLine, FaUsers } from "react-icons/fa";

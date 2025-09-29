@@ -296,11 +296,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     const fetchBrandLogo = async () => {
       if (!product.data.brand || !process.env.NEXT_PUBLIC_API_URL) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/brands`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/brand`);
         if (response.ok) {
-          const brandsData = await response.json();
-          const brand = brandsData.find((b: any) => b.name === product.data.brand);
-          setBrandLogo(brand?.logo || null);
+          const brandsResponse = await response.json();
+          const brandsData = brandsResponse.data || brandsResponse;
+          if (Array.isArray(brandsData)) {
+            const brand = brandsData.find((b: any) => b.name === product.data.brand);
+            setBrandLogo(brand?.logo || null);
+          }
         }
       } catch (error) {
         console.error('Error fetching brand logo:', error);
@@ -490,21 +493,24 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
           // Fetch followers and following status
           try {
             const [followersRes, followingRes] = await Promise.allSettled([
-              axios.get(`${baseUrl}/seller/followers/${encodeURIComponent(profile._id)}`),
+              axios.get(`${baseUrl}/seller/followers/${encodeURIComponent(profile._id)}`).catch(() => ({ data: { followers: 0 } })),
               localStorage.getItem("accessToken") ? 
                 axios.get(`${baseUrl}/seller/is-following?sellerId=${encodeURIComponent(profile._id)}`, 
-                  { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } }) : 
+                  { headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` } })
+                  .catch(() => ({ data: { isFollowing: false } })) : 
                 Promise.resolve({ data: { isFollowing: false } })
             ]);
             
             if (followersRes.status === 'fulfilled') {
-              newSellerData.followersCount = followersRes.value.data.followers;
+              newSellerData.followersCount = followersRes.value.data.followers || 0;
             }
             if (followingRes.status === 'fulfilled') {
-              newSellerData.isFollowing = followingRes.value.data.isFollowing;
+              newSellerData.isFollowing = followingRes.value.data.isFollowing || false;
             }
           } catch (error) {
             console.error('Error fetching seller follow data:', error);
+            newSellerData.followersCount = 0;
+            newSellerData.isFollowing = false;
           }
         }
 
@@ -530,8 +536,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       try {
         const token = localStorage.getItem('accessToken');
         const [wishlistRes, reviewsRes] = await Promise.allSettled([
-          token ? axios.get(`${baseUrl}/wishlist/check/${encodeURIComponent(product.data._id)}`, 
-            { headers: { Authorization: `Bearer ${token}` } }) : Promise.resolve({ data: { isWishlisted: false } }),
+          // token ? axios.get(`${baseUrl}/wishlist/check/${encodeURIComponent(product.data._id)}`, 
+          //   { headers: { Authorization: `Bearer ${token}` } }) : 
+          Promise.resolve({ data: { isWishlisted: false } }),
           axios.get(`${baseUrl}/reviews/${encodeURIComponent(product.data._id)}`)
         ]);
 
@@ -562,12 +569,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
         return;
       }
 
-      const url = uiState.isWishlisted ? 'remove' : 'add';
-      await axios.post(
-        `${baseUrl}/wishlist/${url}`,
-        { productId: product.data._id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // Wishlist functionality not implemented in backend yet
+      // const url = uiState.isWishlisted ? 'remove' : 'add';
+      // await axios.post(
+      //   `${baseUrl}/wishlist/${url}`,
+      //   { productId: product.data._id },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
       
       setUiState(prev => ({ ...prev, isWishlisted: !prev.isWishlisted }));
       toast.success(uiState.isWishlisted ? 'Removed from wishlist' : 'Added to wishlist');
@@ -1121,17 +1129,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                     >
                       Visit the {sellerData.profile?.brand?.name || product.data.sellerName || 'MirexaStore'}
                     </a>
-                    {product.data.brand && (
+                    {product.data.brand && brandLogo && (
                       <div className="flex items-center gap-2">
                         <span>Brand:</span>
-                        {brandLogo && (
-                          <img 
-                            src={brandLogo} 
-                            alt={product.data.brand} 
-                            className="w-5 h-5 object-contain"
-                          />
-                        )}
-                        <span>{product.data.brand}</span>
+                        <img 
+                          src={brandLogo} 
+                          alt={product.data.brand} 
+                          className="w-12 h-12 object-contain"
+                        />
                       </div>
                     )}
                   </div>
@@ -1584,7 +1589,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                   width={800}
                   height={600}
                   className="max-w-full max-h-full object-contain"
-                  unoptimized={true}
                 />
               </div>
             </div>

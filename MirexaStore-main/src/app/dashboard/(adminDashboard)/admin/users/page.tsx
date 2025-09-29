@@ -8,7 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Loading from "@/app/loading";
 import { RootState } from "@/app/lib/redux/store";
 import { useSelector } from "react-redux";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import ConfirmationModal from "@/app/(commonLayout)/components/ConfirmationModal/ConfirmationModal";
 import UserTableSkeleton from "../components/skeleton/UserTableSkeleton";
 

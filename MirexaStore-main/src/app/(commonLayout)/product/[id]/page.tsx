@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import RelatedProduct from "../RelatedProduct";
 import ProductDetails from "../productDetails";
 
-type tParams = Promise<{ id: string[] }>;
-export async function generateMetadata({ params }: { params: tParams }) {
+type tParams = { id: string };
+export async function generateMetadata({ params }: { params: Promise<tParams> }) {
   const { id } = await params;
 
   try {
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: tParams }) {
   }
 }
 
-const ProductPage = async ({ params }: { params: tParams }) => {
+const ProductPage = async ({ params }: { params: Promise<tParams> }) => {
   const { id } = await params;
 
   try {

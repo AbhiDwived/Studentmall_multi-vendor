@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import Loading from "@/app/loading";
 import SubscriptionRequestsSkeleton from "../components/skeleton/SubscriptionRequestsSkeleton";
 

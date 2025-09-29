@@ -9,7 +9,7 @@ import ConfirmationModal from "../../components/ConfirmationModal/ConfirmationMo
 import Loading from "@/app/loading";
 import { RootState } from "@/app/lib/redux/store";
 import { useSelector } from "react-redux";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 
 // User type definition
 type UserType = {

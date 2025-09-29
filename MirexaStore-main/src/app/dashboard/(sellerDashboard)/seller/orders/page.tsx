@@ -6,7 +6,7 @@ import Axios from "axios";
 import Loading from "@/app/loading";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 import { useSelector } from "react-redux";
 import { RootState } from "@/app/lib/redux/store";
 import { useAppSelector } from "@/app/lib/redux/hook";

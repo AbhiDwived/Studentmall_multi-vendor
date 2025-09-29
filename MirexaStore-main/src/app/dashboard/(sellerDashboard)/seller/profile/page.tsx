@@ -6,7 +6,7 @@ import { RootState } from "@/app/lib/redux/store";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import WithAuth from "@/app/lib/utils/withAuth";
+import WithAuth from "@/lib/utils/withAuth";
 
 const SellerProfile = () => {
   const user = useSelector((state: RootState) => state.auth.user);
