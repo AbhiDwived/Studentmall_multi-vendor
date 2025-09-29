@@ -7,7 +7,7 @@
     "start": "node ./dist/server.js",
     "start:prod": "node ./dist/server.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "echo 'Build skipped - using source files directly' && exit 0",
+    "build": "./node_modules/.bin/tsc || npx tsc",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",

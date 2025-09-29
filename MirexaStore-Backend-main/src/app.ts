@@ -2,6 +2,7 @@ import cors, { CorsOptions } from 'cors';
 import express, { Application, Request, Response } from 'express';
 import passport from 'passport';
 import session from 'express-session';
+import mongoose from 'mongoose';
 import globalErrorHandler from './app/middlewares/globalErrorhandler';
 import notFound from './app/middlewares/notFound';
 import router from './app/routes';
@@ -64,9 +65,39 @@ app.use(passport.session());
 // Routes
 app.use('/api', router);
 
+// Database connection middleware for serverless
+app.use(async (req: Request, res: Response, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await mongoose.connect(config.database_url as string);
+      console.log('Database connected');
+    } catch (error) {
+      console.error('Database connection failed:', error);
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+  }
+  next();
+});
+
 // Health check
 app.get('/', (req: Request, res: Response) => {
-  res.send('🚀 Deployment Successful!....');
+  res.json({
+    message: '🚀 Deployment Successful!....',
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: config.NODE_ENV,
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+  });
+});
+
+// API health check
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({
+    status: 'OK',
+    message: 'API is working properly',
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+  });
 });
 
 // Error handlers

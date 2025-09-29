@@ -5,28 +5,56 @@ import { Server } from 'http'
 import './app/cron/sellerValidityJob';
 
 let server: Server;
+let isConnected = false;
 
-async function main() {
+// Connect to MongoDB
+async function connectDB() {
+  if (isConnected) {
+    return;
+  }
+  
   try {
     await mongoose.connect(config.database_url as string);
-
-    server = app.listen(config.port, () => {
-      console.log(`app is listening on port ${config.port}`);
-    });
+    isConnected = true;
+    console.log('MongoDB connected successfully');
   } catch (err) {
-    console.log(err);
+    console.error('MongoDB connection error:', err);
+    throw err;
   }
 }
 
-main();
+// For Vercel serverless deployment
+if (process.env.VERCEL) {
+  // Initialize database connection for serverless
+  connectDB().catch(console.error);
+  
+  // Export the app for Vercel
+  module.exports = app;
+} else {
+  // For local development
+  async function main() {
+    try {
+      await connectDB();
 
-
-process.on('unhandledRejection', () => {
-  console.log(`😪 unhandledRejection is detected, shutting down ....`);
-  if (server) {
-    server.close(() => {
-      process.exit(1)
-    })
+      server = app.listen(config.port, () => {
+        console.log(`app is listening on port ${config.port}`);
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
-  process.exit(1)
-})
+
+  main();
+
+  process.on('unhandledRejection', () => {
+    console.log(`😪 unhandledRejection is detected, shutting down ....`);
+    if (server) {
+      server.close(() => {
+        process.exit(1)
+      })
+    }
+    process.exit(1)
+  })
+}
+
+export default app;
