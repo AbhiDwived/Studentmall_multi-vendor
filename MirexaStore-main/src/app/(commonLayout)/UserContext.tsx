@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useContext,
@@ -9,16 +11,31 @@ import {
 const UserContext = createContext(null);
 
 interface UserProviderProps {
-  children: ReactNode; // এখানে children-এর টাইপ ReactNode
+  children: ReactNode;
 }
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    setUser(storedUser);
+    setIsClient(true);
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser && storedUser !== "{}") {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          localStorage.removeItem("user");
+        }
+      }
+    }
   }, []);
+
+  if (!isClient) {
+    return <UserContext.Provider value={null}>{children}</UserContext.Provider>;
+  }
 
   return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
