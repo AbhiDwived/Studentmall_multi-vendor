@@ -103,18 +103,18 @@ const checkoutSchema = new Schema<TCheckout>(
 checkoutSchema.set("toJSON", {
 	transform: (doc, ret) => {
 		// Convert _id to id and remove __v
-		ret.id = ret._id.toString();
+		ret.id = ret._id?.toString();
 		delete ret._id;
 		delete ret.__v;
 
 		// Convert Dates to ISO strings
 		if (ret.orderDate instanceof Date) ret.orderDate = ret.orderDate.toISOString();
-		if (ret.createdAt instanceof Date) ret.createdAt = ret.createdAt.toISOString();
-		if (ret.updatedAt instanceof Date) ret.updatedAt = ret.updatedAt.toISOString();
+		if (ret.createdAt) ret.createdAt = new Date(ret.createdAt).toISOString();
+		if (ret.updatedAt) ret.updatedAt = new Date(ret.updatedAt).toISOString();
 
 		// Clean _id inside items if present
 		if (Array.isArray(ret.items)) {
-			ret.items = ret.items.map((item) => {
+			ret.items = ret.items.map((item: any) => {
 				if (item._id) {
 					item.id = item._id.toString();
 					delete item._id;

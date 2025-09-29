@@ -18,8 +18,8 @@ const userSchema = new Schema<TUser>(
 	{
 		toJSON: {
 			transform(doc, ret) {
-				delete ret.password;
-				delete ret.__v;
+				if (ret.password) delete ret.password;
+				if (ret.__v) delete ret.__v;
 
 				// Ordered return object
 				const orderedRet = {

@@ -49,7 +49,7 @@ const generateAccessToken = (user: any) => {
 		email: user.email,
 		role: user.role,
 	};
-	return jwt.sign(jwtPayload, config.jwt_access_secret, {
+	return jwt.sign(jwtPayload, config.jwt_access_secret as string, {
 		expiresIn: config.jwt_access_expires_in,
 	});
 };
@@ -60,7 +60,7 @@ const generateRefreshToken = (user: any) => {
 		email: user.email,
 		role: user.role,
 	};
-	return jwt.sign(jwtPayload, config.jwt_refresh_secret, {
+	return jwt.sign(jwtPayload, config.jwt_refresh_secret as string, {
 		expiresIn: config.jwt_refresh_expires_in,
 	});
 };
