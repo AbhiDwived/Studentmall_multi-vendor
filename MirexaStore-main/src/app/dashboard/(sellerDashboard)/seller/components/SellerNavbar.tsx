@@ -47,11 +47,11 @@ const SellerNavbar = ({ onMenuClick }: SellerNavbarProps) => {
           <MoreVertical size={24} />
         </button>
 
-        <div className="text-white font-bold text-xl tracking-wide">
+        <Link href="/" className="text-white font-bold text-xl tracking-wide hover:opacity-80 transition-opacity cursor-pointer">
           <span className="text-[#F39C12]">Student</span>
           <span className="text-white">Mall</span>
           <span className="text-[#F6550C] ml-2">Seller</span>
-        </div>
+        </Link>
       </div>
 
       {/* Right Section */}

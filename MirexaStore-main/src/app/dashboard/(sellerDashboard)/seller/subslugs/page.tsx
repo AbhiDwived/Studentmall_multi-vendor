@@ -146,12 +146,12 @@ export default function SubSlugsPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">SubSlug Management</h1>
+    <div className="p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">SubSlug Management</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#F6550C] text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-orange-600"
+          className="bg-[#F6550C] text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-orange-600 w-full sm:w-auto"
         >
           <Plus size={20} />
           Add SubSlug
@@ -166,67 +166,107 @@ export default function SubSlugsPage() {
             placeholder="Search subslugs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full max-w-md"
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full sm:max-w-md"
           />
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SubSlug</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Slug</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inner SubSlugs</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredSubSlugs.map((subSlug) => (
-              <tr key={subSlug._id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{subSlug.slug}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subSlug.parentSlug?.name || 'No Parent'}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{subSlug.description || "-"}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {subSlug.innerSubSlugs && subSlug.innerSubSlugs.length > 0 ? (
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
-                      {subSlug.innerSubSlugs.length} inner subslug{subSlug.innerSubSlugs.length !== 1 ? 's' : ''}
-                    </span>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs rounded-full ${subSlug.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {subSlug.status ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(subSlug)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-3"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(subSlug._id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </td>
+      {/* Mobile Card View */}
+      <div className="block sm:hidden space-y-4">
+        {filteredSubSlugs.map((subSlug) => (
+          <div key={subSlug._id} className="bg-white rounded-lg shadow p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-medium text-gray-900">{subSlug.slug}</h3>
+              <span className={`px-2 py-1 text-xs rounded-full ${subSlug.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                {subSlug.status ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 mb-1">Parent: {subSlug.parentSlug?.name || 'No Parent'}</p>
+            <p className="text-sm text-gray-500 mb-2">{subSlug.description || "No description"}</p>
+            {subSlug.innerSubSlugs && subSlug.innerSubSlugs.length > 0 && (
+              <div className="mb-3">
+                <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                  {subSlug.innerSubSlugs.length} inner subslug{subSlug.innerSubSlugs.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleEdit(subSlug)}
+                className="flex-1 bg-indigo-600 text-white px-3 py-2 rounded text-sm hover:bg-indigo-700"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(subSlug._id)}
+                className="flex-1 bg-red-600 text-white px-3 py-2 rounded text-sm hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden sm:block bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SubSlug</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Slug</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inner SubSlugs</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredSubSlugs.map((subSlug) => (
+                <tr key={subSlug._id}>
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{subSlug.slug}</td>
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm text-gray-500">{subSlug.parentSlug?.name || 'No Parent'}</td>
+                  <td className="px-4 lg:px-6 py-4 text-sm text-gray-500">{subSlug.description || "-"}</td>
+                  <td className="px-4 lg:px-6 py-4 text-sm text-gray-500">
+                    {subSlug.innerSubSlugs && subSlug.innerSubSlugs.length > 0 ? (
+                      <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
+                        {subSlug.innerSubSlugs.length} inner subslug{subSlug.innerSubSlugs.length !== 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs rounded-full ${subSlug.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {subSlug.status ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-4 lg:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => handleEdit(subSlug)}
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(subSlug._id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md my-8 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">{editingSubSlug ? 'Edit SubSlug' : 'Add New SubSlug'}</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto p-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md my-8 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">{editingSubSlug ? 'Edit SubSlug' : 'Add New SubSlug'}</h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">SubSlug</label>
@@ -310,17 +350,17 @@ export default function SubSlugsPage() {
                   Active
                 </label>
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="flex flex-col sm:flex-row justify-end gap-2">
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 w-full sm:w-auto"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#F6550C] text-white rounded-md hover:bg-orange-600"
+                  className="px-4 py-2 bg-[#F6550C] text-white rounded-md hover:bg-orange-600 w-full sm:w-auto"
                 >
                   {editingSubSlug ? 'Update' : 'Create'}
                 </button>

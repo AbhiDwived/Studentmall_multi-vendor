@@ -195,34 +195,29 @@ const CategoriesPage = () => {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <div className="p-4 sm:p-6">Loading...</div>;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Category Management</h1>
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Category Management</h1>
       
-    
-
       {/* Action Buttons */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto"
         >
           {showForm ? "Cancel" : "Add Category"}
         </button>
-        
       </div>
 
       {/* Add Category Form */}
       {showForm && (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md mb-4 sm:mb-6">
           <h2 className="text-lg font-semibold mb-4">Add New Category</h2>
           
-
-          
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium mb-1">Category Name</label>
               <input
                 type="text"
@@ -241,7 +236,7 @@ const CategoriesPage = () => {
               />
             </div>
             
-            <div>
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium mb-1">Slug</label>
               <input
                 type="text"
@@ -253,7 +248,7 @@ const CategoriesPage = () => {
               />
             </div>
             
-            <div>
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium mb-1">Banner Image URL</label>
               <input
                 type="url"
@@ -264,10 +259,10 @@ const CategoriesPage = () => {
               />
             </div>
             
-            <div className="md:col-span-3">
+            <div className="sm:col-span-2 lg:col-span-3">
               <button
                 type="submit"
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 w-full sm:w-auto"
               >
                 Create Category
               </button>
@@ -276,17 +271,13 @@ const CategoriesPage = () => {
         </div>
       )}
 
-
-
-
-
       {/* Categories Grid */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-semibold mb-4">Categories ({categories.length})</h2>
         {categories.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No categories found. Add some categories above.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
               <div key={category._id} className="border rounded-lg p-4 hover:shadow-md transition">
                 <div className="relative w-full h-32 bg-gray-200 rounded-md mb-3 overflow-hidden">
@@ -306,47 +297,47 @@ const CategoriesPage = () => {
                       type="text"
                       value={editForm.name}
                       onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                      className="w-full p-1 border rounded text-sm"
+                      className="w-full p-2 border rounded text-sm"
                       placeholder="Category name"
                     />
                     <input
                       type="url"
                       value={editForm.bannerImage}
                       onChange={(e) => setEditForm({...editForm, bannerImage: e.target.value})}
-                      className="w-full p-1 border rounded text-sm"
+                      className="w-full p-2 border rounded text-sm"
                       placeholder="Image URL"
                     />
-                    <div className="flex gap-1">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         onClick={saveEdit}
-                        className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
+                        className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 w-full sm:w-auto"
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600"
+                        className="bg-gray-500 text-white px-3 py-2 rounded text-sm hover:bg-gray-600 w-full sm:w-auto"
                       >
                         Cancel
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{category.name}</h3>
-                      <p className="text-sm text-gray-500">{category.slug}</p>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-sm sm:text-base">{category.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-500">{category.slug}</p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2 sm:gap-1">
                       <button
                         onClick={() => startEdit(category)}
-                        className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1"
+                        className="text-blue-600 hover:text-blue-800 text-sm px-2 py-1 flex-1 sm:flex-none"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteCategory(category._id)}
-                        className="text-red-600 hover:text-red-800 text-sm px-2 py-1"
+                        className="text-red-600 hover:text-red-800 text-sm px-2 py-1 flex-1 sm:flex-none"
                       >
                         Delete
                       </button>

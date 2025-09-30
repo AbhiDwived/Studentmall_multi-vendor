@@ -567,13 +567,18 @@ const AddProduct = () => {
       );
       if (response.status === 200) {
         toast.success("✅ Product added successfully!");
+        const productId = response.data.data?._id || response.data.data?.id;
         resetForm();
         // Reset Category States
         setSelectedCategory("");
         setCustomCategory("");
-        // Navigate to seller products page
+        // Navigate to the specific product page
         setTimeout(() => {
-          window.location.href = "/dashboard/seller/products";
+          if (productId) {
+            window.location.href = `/dashboard/seller/products/${productId}`;
+          } else {
+            window.location.href = "/dashboard/seller/products";
+          }
         }, 1500);
       } else {
         throw new Error(response.data.message);
@@ -1030,7 +1035,7 @@ const AddProduct = () => {
             </div>
             <div className="space-y-3">
               {variant.specification?.map((spec, specIndex) => (
-                <div key={specIndex} className="flex gap-3">
+                <div key={specIndex} className="flex flex-col sm:flex-row gap-3">
                   <div className="flex-1">
                     <input
                       type="text"
@@ -1052,7 +1057,7 @@ const AddProduct = () => {
                   <button
                     type="button"
                     onClick={() => removeVariantSpecification(index, specIndex)}
-                    className="bg-accent-orange hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium text-sm"
+                    className="bg-accent-orange hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium text-sm w-full sm:w-auto"
                   >
                     ×
                   </button>
@@ -1075,8 +1080,8 @@ const AddProduct = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-5xl mx-auto px-6">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         <ToastContainer />
         {loading && (
           <div className="container mx-auto p-6">
@@ -1118,7 +1123,7 @@ const AddProduct = () => {
           </div>
         </div>
       )}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-8">
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="text-center">
               <h1 className="text-3xl font-bold text-navy-blue mb-2">
@@ -1129,12 +1134,12 @@ const AddProduct = () => {
               </p>
             </div>
             {/* Basic Information Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <Package className="w-5 h-5 text-accent-orange" />
                 Basic Information
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {renderInputField("Product Name", "name", "text", Tag, "#F39C12", true)}
                 {renderInputField("Slug (Editable)", "slug", "text", Sliders, "#F39C12", true)}
               </div>
@@ -1147,12 +1152,12 @@ const AddProduct = () => {
             </div>
 
             {/* Product Details Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <Info className="w-5 h-5 text-accent-orange" />
                 Product Details
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {renderInputField("Materials", "materials", "text", Box, "#F39C12")}
                 <div className="flex flex-col gap-2">
                   <label className="font-semibold text-navy-blue mb-1 flex items-center gap-1">
@@ -1176,12 +1181,12 @@ const AddProduct = () => {
             </div>
 
             {/* Pricing Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-accent-orange" />
                 Pricing & Stock
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {renderInputField("Price", "price", "number", DollarSign, "#F39C12", true)}
                 {renderInputField("Discount %", "discountPercentage", "number", Percent, "#F39C12", true)}
                 <div className="flex flex-col gap-2">
@@ -1205,8 +1210,8 @@ const AddProduct = () => {
               </div>
             </div>
             {/* Category Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <Layers className="w-5 h-5 text-accent-orange" />
                 Category & Brand
               </h2>
@@ -1241,7 +1246,7 @@ const AddProduct = () => {
                   />
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="font-semibold text-navy-blue mb-2 flex items-center gap-1">
                       Brand
@@ -1265,23 +1270,23 @@ const AddProduct = () => {
             </div>
 
             {/* Enhanced Fields Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <Shield className="w-5 h-5 text-accent-orange" />
                 Advanced Settings
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {renderInputField("SKU", "sku", "text", Package, "#F39C12")}
                 {renderInputField("Low Stock Alert", "lowStockThreshold", "number", Archive, "#F39C12")}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
                 {renderInputField("Return Policy", "returnPolicy", "text", Shield, "#F39C12")}
                 {renderInputField("Dimensions", "dimensions", "text", Box, "#F39C12")}
                 {renderInputField("Packing Standard", "packingStandard", "text", Package, "#F39C12")}
               </div>
               
               {/* Slug Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                 <div>
                   <label className="font-semibold text-navy-blue mb-2 flex items-center gap-1">
                     Slug
@@ -1327,8 +1332,8 @@ const AddProduct = () => {
               </div>
             </div>
             {/* Media & Content Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-accent-orange" />
                 Media & Content
               </h2>
@@ -1339,9 +1344,9 @@ const AddProduct = () => {
             </div>
             
             {/* Specifications Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-navy-blue flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-navy-blue flex items-center gap-2">
                   <Sliders className="w-5 h-5 text-accent-orange" />
                   Specifications (Key-Value Pairs)
                 </h2>
@@ -1354,7 +1359,7 @@ const AddProduct = () => {
                 </button>
               </div>
               {specifications.map((spec, index) => (
-                <div key={index} className="flex gap-3 mb-3">
+                <div key={index} className="flex flex-col sm:flex-row gap-3 mb-3">
                   <input
                     type="text"
                     placeholder="Key (e.g., Material)"
@@ -1372,7 +1377,7 @@ const AddProduct = () => {
                   <button
                     type="button"
                     onClick={() => removeSpecification(index)}
-                    className="bg-accent-orange hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium"
+                    className="bg-accent-orange hover:bg-orange-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 font-medium w-full sm:w-auto"
                   >
                     ×
                   </button>
@@ -1380,8 +1385,8 @@ const AddProduct = () => {
               ))}
             </div>
             {/* Affiliate Link Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold text-navy-blue mb-6 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg">
+              <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-4 sm:mb-6 flex items-center gap-2">
                 <Link2 className="w-5 h-5 text-accent-orange" />
                 Affiliate Settings
               </h2>
@@ -1430,9 +1435,9 @@ const AddProduct = () => {
             </div>
             
             {/* Product Variants Section */}
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-navy-blue mb-2 flex items-center gap-2">
+            <div className="bg-gray-50 p-4 sm:p-6 rounded-lg w-full">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-xl font-semibold text-navy-blue mb-2 flex items-center gap-2">
                   <Layers className="w-5 h-5 text-accent-orange" />
                   Product Variants
                 </h2>

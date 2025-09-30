@@ -971,13 +971,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
             />
 
 
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row gap-6">
               {/* Product Images Gallery */}
-              <div className="w-full md:w-1/2 flex flex-col">
+              <div className="w-full lg:w-1/2 flex flex-col">
                 
                 <div className="flex flex-wrap gap-4 justify-center">
                   <div className="w-full mb-4 max-w-[600px]">
-                    <div className="relative w-full h-80 overflow-hidden rounded-lg shadow-md group">
+                    <div className="relative w-full h-64 sm:h-80 overflow-hidden rounded-lg shadow-md group">
                       <Image
                         src={selectedImage}
                         alt={product.data.name}
@@ -989,21 +989,21 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                       />
                       <button
                         onClick={() => setUiState(prev => ({ ...prev, showImageModal: true }))}
-                        className="absolute top-4 right-4 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <HiMagnifyingGlassPlus className="w-5 h-5 text-gray-700" />
+                        <HiMagnifyingGlassPlus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" />
                       </button>
                     </div>
                   </div>
                   {/* Thumbnails for the Gallery */}
-                  <div className="flex gap-4 overflow-x-auto">
+                  <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-2">
                     {allImages.map((image, index) => (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         key={index}
                         src={image}
                         alt={product.data.name}
-                        className={`w-20 h-20 object-cover rounded-lg cursor-pointer border transition-all duration-300 ${
+                        className={`w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg cursor-pointer border transition-all duration-300 flex-shrink-0 ${
                           selectedImage === image
                             ? "border-orange-600"
                             : "border-gray-300"
@@ -1015,7 +1015,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                 </div>
                 
                 {/* Product Information Section */}
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-4 lg:block hidden">
                   <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
                     <h4 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Product Information</h4>
                     <div className="space-y-3">
@@ -1116,13 +1116,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
               </div>
 
               {/* Product Details */}
-              <div className="w-full md:w-1/2">
+              <div className="w-full lg:w-1/2">
                 <div className="flex flex-col gap-4">
                   {/* Product Name */}
-                  <h1 className="text-2xl md:text-3xl font-semibold">{product.data.name}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold">{product.data.name}</h1>
 
                   {/* Store Name and Brand */}
-                  <div className="flex justify-between items-center text-sm text-gray-600">
+                  <div className="flex flex-row justify-between items-center gap-2 text-sm text-gray-600">
                     <a 
                       href={sellerData.profile?.brand?.slug ? `/stores/${sellerData.profile.brand.slug}` : '#'} 
                       className="text-blue-600 hover:underline cursor-pointer"
@@ -1135,7 +1135,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                         <img 
                           src={brandLogo} 
                           alt={product.data.brand} 
-                          className="w-12 h-12 object-contain"
+                          className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
                         />
                       </div>
                     )}
@@ -1152,19 +1152,20 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                       </span>
                     </div>
                   )}
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-start gap-2">
+                  <div className="space-y-3">
+                    {/* Price, Stock, Wishlist Row */}
+                    <div className="flex flex-row items-center justify-between gap-2">
+                      <div className="flex flex-row items-center gap-2 sm:gap-4">
+                        <div className="flex items-start gap-1 sm:gap-2">
                           {/* Base Price (crossed out) */}
                           {dynamicProductDetails.basePrice > dynamicProductDetails.finalPrice && (
-                            <span className="text-lg text-gray-500 line-through">
+                            <span className="text-sm sm:text-lg text-gray-500 line-through">
                               ₹{Math.round(dynamicProductDetails.basePrice)}
                             </span>
                           )}
                           {/* Final Price and Discount */}
                           <div className="flex items-start">
-                            <span className="text-2xl font-semibold text-orange-600">
+                            <span className="text-lg sm:text-2xl font-semibold text-orange-600">
                               ₹{Math.round(cartQuantity >= 10 ? getBulkPricing(cartQuantity) : currentPrice)}
                             </span>
                             {dynamicProductDetails.discount > 0 && (
@@ -1174,35 +1175,23 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                             )}
                           </div>
                         </div>
-                        <div className="text-sm font-medium text-green-600">
+                        <div className="text-xs sm:text-sm font-medium text-green-600">
                           {currentStock > 0 ? `${currentStock} in stock` : <span className="text-red-600">Out of stock</span>}
                           {currentStock <= (product.data.lowStockThreshold || 10) && currentStock > 0 && (
-                            <span className="ml-2 text-orange-600 font-semibold">(Low Stock!)</span>
+                            <span className="ml-1 sm:ml-2 text-orange-600 font-semibold">(Low Stock!)</span>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center">
                         <button
                           onClick={handleWishlistToggle}
                           className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors"
                         >
                           {uiState.isWishlisted ? (
-                            <HiHeart className="w-6 h-6 text-red-500" />
+                            <HiHeart className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                           ) : (
-                            <HiOutlineHeart className="w-6 h-6 text-gray-600" />
+                            <HiOutlineHeart className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                           )}
-                        </button>
-                        <button
-                          onClick={() => setUiState(prev => ({ ...prev, showShareModal: true }))}
-                          className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors"
-                        >
-                          <HiShare className="w-6 h-6 text-gray-600" />
-                        </button>
-                        <button
-                          onClick={handleAddToCompare}
-                          className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                        >
-                          Compare
                         </button>
                       </div>
                     </div>
@@ -1219,24 +1208,40 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
 
 
 
-                  {/* Quantity Selector */}
-                  <div className="flex items-center gap-4">
-                    <span className="font-semibold text-gray-700">Quantity:</span>
-                    <div className="flex items-center border border-gray-300 rounded-lg">
+                  {/* Quantity, Share, Compare Row */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <span className="font-semibold text-gray-700">Quantity:</span>
+                      <div className="flex items-center border border-gray-300 rounded-lg">
+                        <button
+                          onClick={() => setCartQuantity(Math.max(1, cartQuantity - 1))}
+                          className="p-2 hover:bg-gray-100 transition-colors"
+                          disabled={cartQuantity <= 1}
+                        >
+                          <HiMinus className="w-4 h-4" />
+                        </button>
+                        <span className="px-4 py-2 min-w-[60px] text-center">{cartQuantity}</span>
+                        <button
+                          onClick={() => setCartQuantity(Math.min(currentStock, cartQuantity + 1))}
+                          className="p-2 hover:bg-gray-100 transition-colors"
+                          disabled={cartQuantity >= currentStock}
+                        >
+                          <HiPlus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setCartQuantity(Math.max(1, cartQuantity - 1))}
-                        className="p-2 hover:bg-gray-100 transition-colors"
-                        disabled={cartQuantity <= 1}
+                        onClick={() => setUiState(prev => ({ ...prev, showShareModal: true }))}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 transition-colors"
                       >
-                        <HiMinus className="w-4 h-4" />
+                        <HiShare className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
                       </button>
-                      <span className="px-4 py-2 min-w-[60px] text-center">{cartQuantity}</span>
                       <button
-                        onClick={() => setCartQuantity(Math.min(currentStock, cartQuantity + 1))}
-                        className="p-2 hover:bg-gray-100 transition-colors"
-                        disabled={cartQuantity >= currentStock}
+                        onClick={handleAddToCompare}
+                        className="px-2 py-1 sm:px-3 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
                       >
-                        <HiPlus className="w-4 h-4" />
+                        Compare
                       </button>
                     </div>
                   </div>
@@ -1252,7 +1257,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                       
                       {/* Slug and SubSlug Dropdowns in Row */}
                       {product.data.variants && product.data.variants.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {/* Inner Slug Dropdown */}
                           {product.data.variants && [...new Set(product.data.variants.map(v => v.innerSlug).filter(Boolean))].length > 0 && (
                             <div>
@@ -1298,7 +1303,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                           })()}
                         </div>
                       )}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Color Options - only show if current variant selection has colors */}
                         {product.data.variants && (() => {
                           const availableVariants = variantState.innerSlug 
@@ -1452,7 +1457,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                   )}
 
                   {/* Add to Cart & Buy Now Buttons */}
-                  <div className="flex gap-4 pt-4 border-t border-gray-200">
+                  <div className="hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-gray-200">
                     {product.data.type === "affiliate" ? (
                       <a
                         href={product.data.affiliateLink}
@@ -1489,6 +1494,61 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                       </>
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Product Information Section */}
+            <div className="lg:hidden mt-6 space-y-4">
+              <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
+                <h4 className="text-lg font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">Product Information</h4>
+                <div className="space-y-3">
+                {longDesc && (
+                  <div className="mb-4 pb-3 border-b border-gray-200">
+                    <span className="font-semibold">Description:</span>
+                    <p className="text-base text-gray-600 leading-relaxed whitespace-pre-wrap mt-1">
+                      {displayDesc}
+                    </p>
+                    {isLong && (
+                      <button
+                        onClick={() => setUiState(prev => ({ ...prev, showFullDescription: !prev.showFullDescription }))}
+                        className="mt-2 text-sm text-blue-600 hover:underline focus:outline-none"
+                      >
+                        {uiState.showFullDescription ? "See less ▲" : "See more ▼"}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {product.data.brand && product.data.brand.trim() !== "" && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold">Brand:</span>
+                    <span>{product.data.brand}</span>
+                  </div>
+                )}
+                {product.data.materials && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold">Materials:</span>
+                    <span>{product.data.materials}</span>
+                  </div>
+                )}
+                {product.data.warranty && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold">Warranty:</span>
+                    <span>{product.data.warranty}</span>
+                  </div>
+                )}
+                {product.data.tags && product.data.tags.some((tag) => tag.trim() !== "") && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold">Tags:</span>
+                    <span>{product.data.tags.filter((tag) => tag.trim() !== "").join(", ")}</span>
+                  </div>
+                )}
+                {(product.data.addedBy || product.data.sellerName) && (
+                  <div className="flex gap-2">
+                    <span className="font-semibold">Seller:</span>
+                    <span>{product.data.addedBy || product.data.sellerName}</span>
+                  </div>
+                )}
                 </div>
               </div>
             </div>
@@ -1679,14 +1739,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
           )}
 
           {/* Mobile Sticky Add to Cart */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-40">
-            <div className="flex gap-3">
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:hidden z-40">
+            <div className="flex gap-2">
               {product.data.type === "affiliate" ? (
                 <a
                   href={product.data.affiliateLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 bg-green-600 text-white text-center font-semibold rounded-md"
+                  className="flex-1 py-3 bg-green-600 text-white text-center font-semibold rounded-md text-sm"
                 >
                   Buy Now
                 </a>
@@ -1695,14 +1755,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                   <button
                     onClick={handleAddToCart}
                     disabled={uiState.isLoading || currentStock <= 0}
-                    className="flex-1 py-3 bg-orange-600 text-white font-semibold rounded-md disabled:opacity-50"
+                    className="flex-1 py-3 bg-orange-600 text-white font-semibold rounded-md disabled:opacity-50 text-sm"
                   >
                     Add to Cart
                   </button>
                   <button
                     onClick={handleBuyNow}
                     disabled={uiState.isLoading || currentStock <= 0}
-                    className="flex-1 py-3 bg-green-600 text-white font-semibold rounded-md disabled:opacity-50"
+                    className="flex-1 py-3 bg-green-600 text-white font-semibold rounded-md disabled:opacity-50 text-sm"
                   >
                     Buy Now
                   </button>
