@@ -207,6 +207,15 @@ const ProductCart = ({ products }: ProductCartProps) => {
                             fill
                             unoptimized
                             className="object-contain"
+                            onError={(e) => {
+                              // If first image fails, try other images from the product
+                              const target = e.target as HTMLImageElement;
+                              const otherImages = product.productImages?.slice(1) || [];
+                              const nextImage = otherImages.find(img => img !== target.src);
+                              if (nextImage && target.src !== nextImage) {
+                                target.src = nextImage;
+                              }
+                            }}
                           />
                         </div>
                       ) : (

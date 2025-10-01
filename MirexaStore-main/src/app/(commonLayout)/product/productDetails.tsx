@@ -271,7 +271,11 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     description: product.data.variantDescription || product.data.description,
     specifications: product.data.specifications || []
   });
-  const [selectedImage, setSelectedImage] = useState(product.data.productImages[0]);
+  const [selectedImage, setSelectedImage] = useState(
+    product.data.productImages && product.data.productImages.length > 0 
+      ? product.data.productImages[0] 
+      : ''
+  );
   const [brandLogo, setBrandLogo] = useState<string | null>(null);
 
   // Initialize variants on component mount
@@ -329,7 +333,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
 
   // Update selected image when dynamic images change
   useEffect(() => {
-    if (dynamicProductDetails.images.length > 0) {
+    if (dynamicProductDetails.images && dynamicProductDetails.images.length > 0) {
       setSelectedImage(dynamicProductDetails.images[0]);
     }
   }, [dynamicProductDetails.images]);
@@ -361,7 +365,12 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
   const allImages = useMemo(() => {
     const mainImages = product.data.productImages || [];
     const variantImages = variantState.selected?.images || [];
-    return [...new Set([...mainImages, ...variantImages])];
+    
+    // If variant has images, prioritize them, otherwise use main images
+    if (variantImages.length > 0) {
+      return [...new Set([...variantImages, ...mainImages])];
+    }
+    return mainImages;
   }, [product.data.productImages, variantState.selected?.images]);
 
   const currentPrice = useMemo(() => dynamicProductDetails.finalPrice, [dynamicProductDetails.finalPrice]);
@@ -430,6 +439,9 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     const variantBasePrice = (variant as any).baseprice || variant.basePrice || variant.price || product.data.price;
     const variantFinalPrice = (variant as any).finalprice || variant.finalPrice || variant.price || product.data.discountPrice || product.data.price;
     
+    // Handle variant images - fallback to main product images if variant has no images
+    const variantImages = variant.images && variant.images.length > 0 ? variant.images : product.data.productImages;
+    
     setDynamicProductDetails({
       sku: variant.sku || `product-#${Math.random().toString(36).substr(2, 6)}-${variant.innerSlug ?? 'default'}`,
       size: variant.size ?? 'One Size',
@@ -439,7 +451,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       discount: variant.discount ?? 0,
       finalPrice: variantFinalPrice,
       weight: variant.weight ?? product.data.weight ?? 0,
-      images: variant.images ?? product.data.productImages,
+      images: variantImages,
       description: variant.variantDescription ?? 
         (variant.specification && variant.specification.length > 0 
           ? `${product.data.description} - ${variant.innerSlug?.toUpperCase() ?? ''} ${variant.innerSubSlug?.toUpperCase() ?? ''} variant with ${variant.specification.map(spec => spec.value).join(', ')}.`
@@ -985,6 +997,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                         height={500}
                         className="w-full h-full object-contain transition-all duration-300 cursor-zoom-in"
                         unoptimized={true}
+                        onError={(e) => {
+                          // If current image fails, try to use another available image
+                          const target = e.target as HTMLImageElement;
+                          const allAvailableImages = [...(product.data.productImages || [])];
+                          const nextImage = allAvailableImages.find(img => img !== target.src);
+                          if (nextImage && target.src !== nextImage) {
+                            target.src = nextImage;
+                            setSelectedImage(nextImage);
+                          }
+                        }}
                         onClick={() => setUiState(prev => ({ ...prev, showImageModal: true }))}
                       />
                       <button
@@ -1008,6 +1030,16 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                             ? "border-orange-600"
                             : "border-gray-300"
                         }`}
+                        onError={(e) => {
+                          // If image fails to load, try to find another available image
+                          const target = e.target as HTMLImageElement;
+                          const allAvailableImages = [...(product.data.productImages || [])];
+                          const currentIndex = allAvailableImages.indexOf(target.src);
+                          const nextImage = allAvailableImages.find((img, idx) => idx !== currentIndex && img !== target.src);
+                          if (nextImage && target.src !== nextImage) {
+                            target.src = nextImage;
+                          }
+                        }}
                         onClick={() => setSelectedImage(image)}
                       />
                     ))}
