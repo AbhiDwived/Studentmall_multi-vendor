@@ -408,7 +408,7 @@ const SellerOrders: React.FC = () => {
 
                   {/* Date */}
                   <td className="py-3 px-4 text-center">
-                    {new Date(order.orderDate).toLocaleDateString()}
+                    {new Date(order.orderDate).toLocaleDateString('en-GB')}
                   </td>
 
                   {/* Total */}

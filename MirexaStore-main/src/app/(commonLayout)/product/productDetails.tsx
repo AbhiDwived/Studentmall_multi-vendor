@@ -620,7 +620,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     return Array.from({ length: 5 }, (_, i) => (
       <HiStar
         key={i}
-        className={`w-4 h-4 ${i < rating ? 'text-yellow-400' : 'text-gray-300'}`}
+        className={`w-4 h-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
         fill="currentColor"
       />
     ));
@@ -1174,13 +1174,13 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                   </div>
 
                   {/* Rating Display */}
-                  {(product.data.rating || reviews.length > 0) && (
+                  {(product.data.rating || product.data.averageRating || reviews.length > 0) && (
                     <div className="flex items-center gap-2">
                       <div className="flex items-center">
-                        {renderStars(product.data.rating || 0)}
+                        {renderStars(product.data.averageRating || product.data.rating || (reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0))}
                       </div>
                       <span className="text-sm text-gray-600">
-                        {product.data.rating?.toFixed(1) || '0.0'} ({product.data.totalReviews || reviews.length} reviews)
+                        {(product.data.averageRating || product.data.rating || (reviews.length > 0 ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0)).toFixed(1)} ({product.data.totalReviews || reviews.length} reviews)
                       </span>
                     </div>
                   )}

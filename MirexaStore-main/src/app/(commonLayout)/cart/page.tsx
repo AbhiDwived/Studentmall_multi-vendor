@@ -21,6 +21,11 @@ type CartItem = {
   productImages: string[];
   color?: string;
   size?: string;
+  innerSlug?: string;
+  innerSubSlug?: string;
+  sku?: string;
+  sellerEmail?: string;
+  sellerName?: string;
 };
 
 const CartPage = () => {
@@ -237,19 +242,46 @@ const CartPage = () => {
                     &times;
                   </button>
 
-                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-200">
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
                     {item.productImages?.length > 0 ? (
                       <Image
                         src={item.productImages[0]}
                         alt={item.name}
-                        width={300}
-                        height={300}
-                        className="object-cover"
+                        width={96}
+                        height={96}
+                        className="object-contain w-full h-full"
                         unoptimized
+                        onError={async (e) => {
+                          const target = e.target as HTMLImageElement;
+                          const otherImages = item.productImages?.slice(1) || [];
+                          const nextImage = otherImages.find(img => img !== target.src);
+                          if (nextImage && target.src !== nextImage) {
+                            target.src = nextImage;
+                          } else {
+                            try {
+                              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${item.productId}`);
+                              if (response.ok) {
+                                const productData = await response.json();
+                                const originalImages = productData.data?.productImages || [];
+                                if (originalImages.length > 0) {
+                                  target.src = originalImages[0];
+                                  return;
+                                }
+                              }
+                            } catch (error) {
+                              // Silent fail
+                            }
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-gray-500 text-xs">No Image</div>';
+                            }
+                          }
+                        }}
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        No Image
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                        No Image Available
                       </div>
                     )}
                   </div>
@@ -257,6 +289,11 @@ const CartPage = () => {
                   <div className="ml-6 flex-1">
                     <h2 className="text-lg font-semibold text-gray-800">
                       {item.name}
+                      {(item.innerSlug || item.innerSubSlug) && (
+                        <span className="text-sm text-gray-500 font-normal">
+                          ({[item.innerSlug, item.innerSubSlug].filter(Boolean).join(', ')})
+                        </span>
+                      )}
                     </h2>
                     <p className="text-sm text-gray-600 mb-1">
                       Price:{" "}
@@ -265,9 +302,14 @@ const CartPage = () => {
                       </span>
                     </p>
                     {item.color && (
-                      <p className="text-sm text-gray-500">
-                        Color: <span className="capitalize">{item.color}</span>
-                      </p>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span>Color:</span>
+                        <div 
+                          className="w-4 h-4 rounded-full border border-gray-300"
+                          style={{ backgroundColor: item.color }}
+                          title={item.color}
+                        ></div>
+                      </div>
                     )}
                     {item.size && (
                       <p className="text-sm text-gray-500">

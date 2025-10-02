@@ -11,6 +11,10 @@ export interface TCheckout {
 		price: number;
 		color?: string;
 		size?: string;
+		name?: string;
+		productImage?: string[];
+		innerSlug?: string;
+		innerSubSlug?: string;
 	}[];
 	totalAmount: number;
 	shippingCost: number;

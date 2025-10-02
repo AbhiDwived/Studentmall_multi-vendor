@@ -1,6 +1,7 @@
 // Enhanced Product Types based on updated backend model
 
 export interface Specification {
+  _id?: string;
   key: string;
   value: string;
 }
@@ -23,6 +24,7 @@ export interface SubSlug {
 }
 
 export interface ProductVariant {
+  _id?: string;
   innerSlug?: string;
   innerSubSlug?: string;
   color: string;
@@ -58,7 +60,9 @@ export interface Product {
   description: string;
   longDescription?: string;
   price: number;
-  discount?: number;
+  discountPrice?: number;
+  discountPercentage?: number;
+  finalPrice?: number;
   stockQuantity: number;
   category: string;
   brand?: string;
@@ -96,6 +100,7 @@ export interface Product {
   // Delivery
   deliveryCharges?: DeliveryCharge[];
   defaultDeliveryCharge?: number;
+  packingStandard?: string;
 
   // Reviews and Ratings
   reviews?: string[];
@@ -128,6 +133,7 @@ export interface Product {
   isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  __v?: number;
 }
 
 // API Response Types

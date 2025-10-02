@@ -54,6 +54,7 @@ interface ProductData {
   warranty: string;
   sellerEmail: string;
   price: number;
+  discountPrice?: number;
   discountPercentage: number;
   finalPrice: number;
   stockQuantity: number;
@@ -187,18 +188,43 @@ const EditProduct = () => {
       );
       const product = response.data.data;
       
+      // Calculate proper discount values with validation
+      const basePrice = product.price || 0;
+      let discountPercentage = product.discountPercentage || 0;
+      let finalPrice = product.finalPrice || basePrice;
+      
+      // Validate price consistency and fix if needed
+      if (product.discountPrice && product.discountPercentage) {
+        // Check if discountPrice matches discountPercentage calculation
+        const expectedFromPercentage = basePrice - (basePrice * discountPercentage / 100);
+        const expectedFromDiscountPrice = ((basePrice - product.discountPrice) / basePrice) * 100;
+        
+        // Use the more accurate calculation
+        if (Math.abs(product.discountPrice - expectedFromPercentage) < Math.abs(product.finalPrice - expectedFromPercentage)) {
+          finalPrice = product.discountPrice;
+          discountPercentage = Math.round(expectedFromDiscountPrice * 100) / 100;
+        } else {
+          finalPrice = Math.round(expectedFromPercentage * 100) / 100;
+        }
+      } else if (product.discountPrice) {
+        finalPrice = product.discountPrice;
+        discountPercentage = Math.round(((basePrice - product.discountPrice) / basePrice) * 100 * 100) / 100;
+      } else if (product.discountPercentage > 0) {
+        finalPrice = Math.round((basePrice - (basePrice * discountPercentage / 100)) * 100) / 100;
+      }
+      
       setProductData({
         name: product.name || "",
         slug: product.urlSlug || product.slug || "",
         description: product.description || "",
         longDescription: product.longDescription || "",
-        materials: product.materials || "",
+        materials: (product.materials || "").replace(/plastice/gi, "Plastic"),
         weight: product.weight || 0,
         warranty: product.warranty || "",
         sellerEmail: product.sellerEmail || "",
-        price: product.price || 0,
-        discountPercentage: product.discountPercentage || 0,
-        finalPrice: product.finalPrice || product.price || 0,
+        price: basePrice,
+        discountPercentage: discountPercentage,
+        finalPrice: finalPrice,
         stockQuantity: product.stockQuantity || 0,
         category: product.category || "",
         brand: product.brand || "",
@@ -217,7 +243,21 @@ const EditProduct = () => {
       });
       
       setProductImages(Array.isArray(product.productImages) ? product.productImages : []);
-      setTags(Array.isArray(product.tags) ? product.tags : product.tags ? [product.tags] : [""]);
+      // Clean and parse tags properly
+      let cleanTags = [""];
+      if (Array.isArray(product.tags)) {
+        cleanTags = product.tags.flatMap(tag => {
+          if (typeof tag === 'string') {
+            // Remove quotes and split by commas
+            return tag.replace(/"/g, '').split(',').map(t => t.trim()).filter(t => t.length > 0);
+          }
+          return [];
+        });
+        if (cleanTags.length === 0) cleanTags = [""];
+      } else if (product.tags) {
+        cleanTags = [product.tags];
+      }
+      setTags(cleanTags);
       setSpecifications(Array.isArray(product.specifications) && product.specifications.length > 0 ? product.specifications : [{key: "", value: ""}]);
       setVariants(Array.isArray(product.variants) ? product.variants : []);
       setIsFeatured(!!product.isFeatured);
@@ -315,7 +355,11 @@ const EditProduct = () => {
     if (name === "price" || name === "discountPercentage") {
       const price = name === "price" ? Number(value) : newData.price;
       const discountPercentage = name === "discountPercentage" ? Number(value) : newData.discountPercentage;
-      newData.finalPrice = price - (price * discountPercentage / 100);
+      newData.finalPrice = Math.round((price - (price * discountPercentage / 100)) * 100) / 100;
+      // Also update discountPrice for backward compatibility
+      if (discountPercentage > 0) {
+        newData.discountPrice = newData.finalPrice;
+      }
     }
     
     setProductData(newData);

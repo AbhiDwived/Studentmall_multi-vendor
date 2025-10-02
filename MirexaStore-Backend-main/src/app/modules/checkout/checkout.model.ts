@@ -12,6 +12,8 @@ export interface TCheckout {
 		color?: string;
 		size?: string;
 		productImage?: string[];
+		innerSlug?: string;
+		innerSubSlug?: string;
 	}>;
 	totalAmount: number;
 	shippingCost: number;
@@ -53,6 +55,8 @@ const checkoutSchema = new Schema<TCheckout>(
 				size: { type: String },
 				name: { type: String },
 				productImage: { type: [String], default: [] },
+				innerSlug: { type: String },
+				innerSubSlug: { type: String },
 			},
 		],
 		totalAmount: { type: Number, required: true },

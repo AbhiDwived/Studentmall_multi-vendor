@@ -8,14 +8,17 @@ import Loading from "@/app/loading";
 import { Pagination } from "@heroui/react";
 import { Star } from "lucide-react";
 import ProductCardSkeleton from "../skeleton/ProductCardSkeleton";
+import { calculateDiscountPercentage, calculateFinalPrice } from "@/lib/utils/productUtils";
 
 // Enhanced Product Type with all new backend model fields
 export interface Specification {
+  _id?: string;
   key: string;
   value: string;
 }
 
 export interface ProductVariant {
+  _id?: string;
   color?: string;
   size?: string;
   sku?: string;
@@ -25,12 +28,12 @@ export interface ProductVariant {
   weight?: number;
   innerSlug?: string;
   innerSubSlug?: string;
-  basePrice?: number;
+  baseprice?: number;
   discount?: number;
-  finalPrice?: number;
-  defaultDescription?: string;
+  finalprice?: number;
+  description?: string;
   variantDescription?: string;
-  specifications?: Specification[];
+  specification?: Specification[];
 }
 
 export interface Slug {
@@ -54,7 +57,7 @@ export type Product = {
   description: string;
   price: number;
   stockQuantity: number;
-  stock: number;
+  stock?: number;
   category: string;
   longDescription?: string;
   materials?: string;
@@ -90,6 +93,8 @@ export type Product = {
   type?: 'own' | 'affiliate';
   affiliateLink?: string;
   discountPrice?: number;
+  discountPercentage?: number;
+  finalPrice?: number;
   brand?: string;
   tags?: string[];
 
@@ -100,7 +105,13 @@ export type Product = {
   productImages: string[];
   videoUrl?: string;
 
+  // Delivery
+  deliveryCharges?: any[];
+  defaultDeliveryCharge?: number;
+  packingStandard?: string;
+
   // Reviews and Ratings
+  reviews?: string[];
   rating?: number;
   totalReviews?: number;
   averageRating?: number;
@@ -124,8 +135,11 @@ export type Product = {
   warranty?: string;
 
   // System Fields
+  deletedBy?: string | null;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
+  __v?: number;
 };
 
 type ProductCartProps = {
@@ -150,15 +164,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
     router.push(`/product/${finalSlug}`);
   };
 
-  const calculateDiscountPercentage = (
-    price: number,
-    discountPrice: number
-  ) => {
-    if (discountPrice && price > discountPrice) {
-      return Math.round(((price - discountPrice) / price) * 100);
-    }
-    return 0;
-  };
+
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 400);
@@ -180,7 +186,14 @@ const ProductCart = ({ products }: ProductCartProps) => {
               currentProducts.map((product) => {
                 const discountPercentage = calculateDiscountPercentage(
                   product.price,
-                  product.discountPrice || 0
+                  product.discountPrice,
+                  (product as any).discountPercentage
+                );
+                const finalPrice = calculateFinalPrice(
+                  product.price,
+                  product.discountPrice,
+                  (product as any).discountPercentage,
+                  (product as any).finalPrice
                 );
 
                 return (
@@ -239,10 +252,10 @@ const ProductCart = ({ products }: ProductCartProps) => {
 
                       {/* Price */}
                       <div className="flex items-center gap-2">
-                        {product.discountPrice ? (
+                        {discountPercentage > 0 ? (
                           <>
                             <span className="text-orange-600 font-bold">
-                              ₹{product.discountPrice}
+                              ₹{Math.round(finalPrice)}
                             </span>
                             <span className="text-xs text-gray-500 line-through">
                               ₹{product.price}
@@ -262,7 +275,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
                             key={i}
                             size={14}
                             fill={
-                              i < (product.averageRating || 0)
+                              i < Math.floor(product.averageRating || product.rating || 0)
                                 ? "#facc15"
                                 : "none"
                             }
@@ -270,7 +283,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
                           />
                         ))}
                         <span className="ml-1 text-gray-500 text-xs">
-                          ({product.totalReviews || 0})
+                          {(product.averageRating || product.rating || 0).toFixed(1)} ({product.totalReviews || 0})
                         </span>
                       </div>
 

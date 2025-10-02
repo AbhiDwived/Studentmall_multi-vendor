@@ -23,6 +23,8 @@ interface OrderItem {
   productDetails: Product;
   review?: string;
   rating: number; // New field for rating
+  innerSlug?: string;
+  innerSubSlug?: string;
 }
 
 interface ShippingDetails {
@@ -102,11 +104,53 @@ const OrderHistory: React.FC = () => {
           const itemsWithDetails = await Promise.all(
             order.items.map(async (item: OrderItem) => {
               const productDetails = await fetchProductDetails(item.productId);
-              return {
+              
+              // Debug: Log the raw item data
+              console.log('🔍 Raw order item from API:', {
+                productId: item.productId,
+                name: item.name,
+                color: item.color,
+                size: item.size,
+                innerSlug: item.innerSlug,
+                innerSubSlug: item.innerSubSlug,
+                fullItem: item
+              });
+              
+              // Check if the item has the name property directly
+              console.log('🔍 Item name check:', {
+                itemName: item.name,
+                hasName: !!item.name,
+                itemKeys: Object.keys(item)
+              });
+              
+              // Workaround: Try to get variant info from localStorage cart if not in order
+              let variantInfo = { innerSlug: item.innerSlug, innerSubSlug: item.innerSubSlug };
+              
+              console.log('Initial variant info from order:', variantInfo);
+              
+              console.log('⚠️ Backend should now save variant data properly after model update');
+              
+              console.log('Final variant info to be used:', variantInfo);
+              console.log('About to spread variantInfo into item:', { item, variantInfo, result: { ...item, ...variantInfo } });
+              
+              const finalItem = {
                 ...item,
+                ...variantInfo,
                 productDetails,
                 rating: 5, // Set initial rating as 5
               };
+              
+              console.log('🔍 Final processed item:', {
+                itemName: finalItem.name,
+                productDetailsName: finalItem.productDetails?.name,
+                innerSlug: finalItem.innerSlug,
+                innerSubSlug: finalItem.innerSubSlug,
+                color: finalItem.color,
+                size: finalItem.size,
+                hasVariants: !!(finalItem.innerSlug || finalItem.innerSubSlug)
+              });
+              
+              return finalItem;
             })
           );
 
@@ -116,7 +160,6 @@ const OrderHistory: React.FC = () => {
           };
         })
       );
-      console.log(ordersWithProductDetails);
       setOrders(ordersWithProductDetails);
       setLoading(false);
     } catch (err) {
@@ -327,9 +370,9 @@ const OrderHistory: React.FC = () => {
               </p>
               <div className="mt-6 space-y-6">
                 <h4 className="text-xl font-semibold">Items</h4>
-                {order.items.map((item: OrderItem) => (
+                {order.items.map((item: OrderItem, itemIndex: number) => (
                   <div
-                    key={item._id}
+                    key={`${order._id}-${item._id}-${itemIndex}`}
                     className="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-gray-300 mb-4"
                   >
                     <Image
@@ -338,15 +381,20 @@ const OrderHistory: React.FC = () => {
                         "https://via.placeholder.com/80"
                       }
                       alt={item.productDetails?.name || "Product"}
-                      width={96} // Equivalent to 24rem in Tailwind
-                      height={96} // Equivalent to 24rem in Tailwind
+                      width={96}
+                      height={96}
                       className="object-cover rounded-md shadow-sm"
                       unoptimized
                     />
                     <div className="ml-6 flex-1">
                       <p className="text-lg font-semibold text-gray-800">
-                        {item.productDetails?.name ||
+                        {item.name || item.productDetails?.name ||
                           "Product details not found"}
+                        {(item.innerSlug || item.innerSubSlug) && (
+                          <span className="text-sm text-gray-500 font-normal">
+                            ({[item.innerSlug, item.innerSubSlug].filter(Boolean).join(', ')})
+                          </span>
+                        )}
                       </p>
                       <p className="text-sm text-gray-600 mt-2">
                         Description:{" "}
@@ -357,18 +405,23 @@ const OrderHistory: React.FC = () => {
                       </p>
 
                       {/* Conditionally render Size and Color */}
-                      {item.size && (
-                        <span className="text-sm text-gray-600 mt-2">
-                          Size:{" "}
-                          <span className="font-semibold">{item.size}</span> |{" "}
-                        </span>
-                      )}
-                      {item.color && (
-                        <span className="text-sm text-gray-600 mt-2">
-                          Color:{" "}
-                          <span className="font-semibold">{item.color}</span>
-                        </span>
-                      )}
+                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                        {item.size && (
+                          <div>
+                            Size: <span className="font-semibold uppercase">{item.size}</span>
+                          </div>
+                        )}
+                        {item.color && (
+                          <div className="flex items-center gap-2">
+                            <span>Color:</span>
+                            <div 
+                              className="w-4 h-4 rounded-full border border-gray-300"
+                              style={{ backgroundColor: item.color as string }}
+                              title={item.color as string}
+                            ></div>
+                          </div>
+                        )}
+                      </div>
 
                       <p className="text-sm text-gray-600 mt-2">
                         Qty: {item.quantity} | Price:{" "}
@@ -398,7 +451,7 @@ const OrderHistory: React.FC = () => {
                         <div className="flex space-x-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
-                              key={star}
+                              key={`${item._id}-star-${star}`}
                               onClick={() => handleRatingChange(item, star)}
                               className={`${
                                 item?.rating >= star
@@ -423,14 +476,14 @@ const OrderHistory: React.FC = () => {
                         />
                         {/* Media upload */}
                         <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {media.map((item, index) => (
+                          {media.map((mediaItem, index) => (
                             <div
-                              key={index}
+                              key={`media-${index}-${mediaItem.url}`}
                               className="relative border rounded-md shadow overflow-hidden group"
                             >
-                              {item.type === "image" ? (
+                              {mediaItem.type === "image" ? (
                                 <Image
-                                  src={item.url}
+                                  src={mediaItem.url}
                                   alt="Preview"
                                   width={500}
                                   height={500}
@@ -438,7 +491,7 @@ const OrderHistory: React.FC = () => {
                                 />
                               ) : (
                                 <video
-                                  src={item.url}
+                                  src={mediaItem.url}
                                   controls
                                   className="w-full h-auto"
                                 />

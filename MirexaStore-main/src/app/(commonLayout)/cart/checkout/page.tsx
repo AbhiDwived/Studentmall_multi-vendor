@@ -38,6 +38,8 @@ type CartItem = {
   size?: string;
   productImage?: string[];
   productImages: string[];
+  innerSlug?: string;
+  innerSubSlug?: string;
 };
 
 type FormDataType = {
@@ -358,17 +360,28 @@ const CheckoutPage = () => {
 
         const orderData = {
           userId: user?._id,
-          items: items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-            sellerEmail: item.sellerEmail,
-            sellerName: item.sellerName,
-            color: item.color || "",
-            size: item.size || "",
-            name: item.name || "",
-            productImage: item.productImages || [],
-          })),
+          items: items.map((item) => {
+            console.log('🛒 Checkout item data:', {
+              name: item.name,
+              innerSlug: item.innerSlug,
+              innerSubSlug: item.innerSubSlug,
+              hasInnerSlug: !!item.innerSlug,
+              hasInnerSubSlug: !!item.innerSubSlug
+            });
+            return {
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              sellerEmail: item.sellerEmail,
+              sellerName: item.sellerName,
+              color: item.color || "",
+              size: item.size || "",
+              name: item.name || "",
+              productImage: item.productImages || [],
+              innerSlug: item.innerSlug || "",
+              innerSubSlug: item.innerSubSlug || "",
+            };
+          }),
           totalAmount,
           totalPrice: totalAmount,
           shippingCost: shipping,
@@ -384,6 +397,12 @@ const CheckoutPage = () => {
         };
 
         console.log("📦 Final Order:", orderData);
+        console.log("📦 Order Items Detail:", orderData.items.map(item => ({
+          name: item.name,
+          innerSlug: item.innerSlug,
+          innerSubSlug: item.innerSubSlug,
+          hasVariants: !!(item.innerSlug || item.innerSubSlug)
+        })));
 
         const response = await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
@@ -451,6 +470,8 @@ const CheckoutPage = () => {
           })),
         });
       }
+
+
 
       toast.success("✅ All orders placed successfully!");
       localStorage.removeItem("cart");
@@ -776,19 +797,57 @@ const CheckoutPage = () => {
                           alt={item.name}
                           width={60}
                           height={60}
-                          className="rounded-lg object-cover border border-gray-200"
+                          className="rounded-lg object-contain border border-gray-200"
                           unoptimized
+                          onError={async (e) => {
+                            const target = e.target as HTMLImageElement;
+                            const otherImages = item.productImages?.slice(1) || [];
+                            const nextImage = otherImages.find(img => img !== target.src);
+                            if (nextImage && target.src !== nextImage) {
+                              target.src = nextImage;
+                            } else {
+                              try {
+                                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${item.productId}`);
+                                if (response.ok) {
+                                  const productData = await response.json();
+                                  const originalImages = productData.data?.productImages || [];
+                                  if (originalImages.length > 0) {
+                                    target.src = originalImages[0];
+                                    return;
+                                  }
+                                }
+                              } catch (error) {
+                                // Silent fail
+                              }
+                            }
+                          }}
                         />
                         <div>
                           <h4 className="font-medium text-gray-800">
                             {item.name}
+                            {(item.innerSlug || item.innerSubSlug) && (
+                              <span className="text-sm text-gray-500 font-normal">
+                                ({[item.innerSlug, item.innerSubSlug].filter(Boolean).join(', ')})
+                              </span>
+                            )}
                           </h4>
-                          <p className="text-sm text-gray-500">
-                            Color:{" "}
-                            <span className="capitalize">{item.color}</span> |
-                            Size:{" "}
-                            <span className="uppercase">{item.size}</span>
-                          </p>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            {item.color && (
+                              <div className="flex items-center gap-2">
+                                <span>Color:</span>
+                                <div 
+                                  className="w-4 h-4 rounded-full border border-gray-300"
+                                  style={{ backgroundColor: item.color }}
+                                  title={item.color}
+                                ></div>
+                              </div>
+                            )}
+                            {item.size && (
+                              <div>
+                                Size: <span className="uppercase">{item.size}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
