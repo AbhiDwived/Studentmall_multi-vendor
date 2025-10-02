@@ -50,15 +50,7 @@ const Navbar = () => {
               <span className="absolute left-0 -bottom-1 w-0 h-[1.5px] bg-white transition-all group-hover:w-full"></span>
             </Link>
 
-            {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative flex items-center gap-1 group"
-            >
-              <ShoppingCart className="w-3.5 h-3.5 text-white" />
-              <span className="relative z-10">Cart</span>
-              <span className="absolute left-0 -bottom-1 w-0 h-[1.5px] bg-white transition-all group-hover:w-full"></span>
-            </Link>
+
 
             {/* Shops */}
             <Link
