@@ -343,7 +343,7 @@ export default function FilterableProductPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-4 mt-10 min-h-screen">
+    <div className="w-full p-4 mt-10 min-h-screen">
       <div className="lg:hidden mb-4 flex justify-center">
         <button
           onClick={() => setIsMobileFilterOpen(true)}
@@ -355,14 +355,14 @@ export default function FilterableProductPage() {
 
       <div className="flex flex-col lg:flex-row gap-10">
         {/* Sidebar Filters */}
-        <aside className="hidden lg:block lg:w-1/4 bg-white p-5 rounded-lg shadow-md sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+        <aside className="hidden lg:block lg:w-1/5 bg-white p-5 rounded-lg shadow-md sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
           {renderFilters()}
         </aside>
 
         {/* Main Product Section */}
-        <section className="flex-1">
+        <section className="flex-1 lg:w-4/5">
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
               {Array.from({ length: perPage }).map((_, i) => (
                 <ProductCardSkeleton key={i} />
               ))}

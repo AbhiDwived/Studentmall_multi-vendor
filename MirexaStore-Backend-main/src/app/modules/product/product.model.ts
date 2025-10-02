@@ -62,8 +62,8 @@ const productSchema = new Schema<TProduct>(
 			{
 				innerSlug: { type: String, required: false },
 				innerSubSlug: { type: String, required: false },
-				color: { type: String, required: false },
-				size: { type: String, required: false },
+				color: { type: [String], default: [] }, // Multiple colors as array
+				size: { type: [String], default: [] }, // Multiple sizes as array
 				baseprice: { type: Number, required: true },
 				discount: { type: Number },
 				finalprice: { type: Number, required: true },

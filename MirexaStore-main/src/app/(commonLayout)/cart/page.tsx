@@ -19,8 +19,8 @@ type CartItem = {
   price: number;
   stockQuantity?: number;
   productImages: string[];
-  color?: string;
-  size?: string;
+  color?: string | string[];
+  size?: string | string[];
   innerSlug?: string;
   innerSubSlug?: string;
   sku?: string;
@@ -119,20 +119,83 @@ const CartPage = () => {
     if (cartData) {
       const parsedCart: CartItem[] = JSON.parse(cartData);
       const userCart = parsedCart.filter((item) => item.userId === userId);
-      setCartItems(userCart);
+      
+      // Fetch correct variant prices from backend
+      const correctedCart = await Promise.all(userCart.map(async (item) => {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/product/${item.productId}`);
+          if (response.ok) {
+            const productData = await response.json();
+            const product = productData.data;
+            
+            // Find matching variant by innerSlug/innerSubSlug first, then by color/size
+            if (product.variants) {
+              let matchingVariant = product.variants.find((v: any) => 
+                v.innerSlug === item.innerSlug && 
+                (!item.innerSubSlug || v.innerSubSlug === item.innerSubSlug)
+              );
+              
+              // If no innerSlug match, try color/size match
+              if (!matchingVariant) {
+                matchingVariant = product.variants.find((v: any) => 
+                  v.color === item.color && v.size === item.size
+                );
+              }
+              
+              if (matchingVariant) {
+                const correctPrice = matchingVariant.finalprice || matchingVariant.finalPrice || matchingVariant.price;
+                if (correctPrice) {
+                  return { ...item, price: correctPrice };
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching variant price:', error);
+        }
+        return item;
+      }));
+      
+      // Update localStorage with corrected prices
+      const allCartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedAllItems = allCartItems.map((item: CartItem) => {
+        const correctedItem = correctedCart.find(c => 
+          c.productId === item.productId && 
+          c.userId === item.userId &&
+          c.innerSlug === item.innerSlug &&
+          c.innerSubSlug === item.innerSubSlug
+        );
+        return correctedItem || item;
+      });
+      localStorage.setItem("cart", JSON.stringify(updatedAllItems));
+      
+      setCartItems(correctedCart);
     }
   }, []);
 
-  const handleQuantityChange = useCallback((id: string, delta: number) => {
+  const handleQuantityChange = useCallback((productId: string, variantKey: string, delta: number) => {
     setCartItems((prevItems) => {
-      const updatedItems = prevItems.map((item) =>
-        item.productId === id
+      const updatedItems = prevItems.map((item) => {
+        // Create variant key for comparison
+        const itemVariantKey = `${item.productId}-${item.color || 'no-color'}-${item.size || 'no-size'}-${item.innerSlug || 'no-slug'}-${item.innerSubSlug || 'no-subslug'}`;
+        return itemVariantKey === variantKey
           ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      );
+          : item;
+      });
 
+      // Update localStorage with all cart items (not just user's items)
+      const allCartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+      const updatedAllItems = allCartItems.map((item: CartItem) => {
+        const itemVariantKey = `${item.productId}-${item.color || 'no-color'}-${item.size || 'no-size'}-${item.innerSlug || 'no-slug'}-${item.innerSubSlug || 'no-subslug'}`;
+        const updatedItem = updatedItems.find(ui => {
+          const uiVariantKey = `${ui.productId}-${ui.color || 'no-color'}-${ui.size || 'no-size'}-${ui.innerSlug || 'no-slug'}-${ui.innerSubSlug || 'no-subslug'}`;
+          return uiVariantKey === itemVariantKey;
+        });
+        return updatedItem || item;
+      });
+      
       setTimeout(() => {
-        localStorage.setItem("cart", JSON.stringify(updatedItems));
+        localStorage.setItem("cart", JSON.stringify(updatedAllItems));
       }, 0);
 
       setQuantityUpdated(true);
@@ -306,20 +369,28 @@ const CartPage = () => {
                         <span>Color:</span>
                         <div 
                           className="w-4 h-4 rounded-full border border-gray-300"
-                          style={{ backgroundColor: item.color }}
-                          title={item.color}
+                          style={{ backgroundColor: Array.isArray(item.color) ? item.color[0] : item.color }}
+                          title={Array.isArray(item.color) ? item.color[0] : item.color}
                         ></div>
+                        <span className="text-xs">
+                          {Array.isArray(item.color) ? item.color[0] : item.color}
+                        </span>
                       </div>
                     )}
                     {item.size && (
                       <p className="text-sm text-gray-500">
-                        Size: <span className="uppercase">{item.size}</span>
+                        Size: <span className="uppercase">
+                          {Array.isArray(item.size) ? item.size[0] : item.size}
+                        </span>
                       </p>
                     )}
                     <div className="flex items-center space-x-4 mt-3">
                       <button
                         className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
-                        onClick={() => handleQuantityChange(item.productId, -1)}
+                        onClick={() => {
+                          const variantKey = `${item.productId}-${item.color || 'no-color'}-${item.size || 'no-size'}-${item.innerSlug || 'no-slug'}-${item.innerSubSlug || 'no-subslug'}`;
+                          handleQuantityChange(item.productId, variantKey, -1);
+                        }}
                         disabled={item.quantity <= 1}
                       >
                         −
@@ -329,7 +400,10 @@ const CartPage = () => {
                       </span>
                       <button
                         className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg"
-                        onClick={() => handleQuantityChange(item.productId, 1)}
+                        onClick={() => {
+                          const variantKey = `${item.productId}-${item.color || 'no-color'}-${item.size || 'no-size'}-${item.innerSlug || 'no-slug'}-${item.innerSubSlug || 'no-subslug'}`;
+                          handleQuantityChange(item.productId, variantKey, 1);
+                        }}
                       >
                         +
                       </button>

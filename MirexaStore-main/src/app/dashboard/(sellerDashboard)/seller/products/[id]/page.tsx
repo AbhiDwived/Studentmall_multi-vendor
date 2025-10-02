@@ -76,8 +76,8 @@ interface ProductData {
 
 interface Variant {
   sku: string;
-  color: string;
-  size: string;
+  color: string[];
+  size: string[];
   stock: number;
   price: number;
   images: string[];
@@ -259,7 +259,13 @@ const EditProduct = () => {
       }
       setTags(cleanTags);
       setSpecifications(Array.isArray(product.specifications) && product.specifications.length > 0 ? product.specifications : [{key: "", value: ""}]);
-      setVariants(Array.isArray(product.variants) ? product.variants : []);
+      // Process variants to ensure color and size are arrays
+      const processedVariants = Array.isArray(product.variants) ? product.variants.map(variant => ({
+        ...variant,
+        color: Array.isArray(variant.color) ? variant.color : [variant.color || "#000000"],
+        size: Array.isArray(variant.size) ? variant.size : [variant.size || ""]
+      })) : [];
+      setVariants(processedVariants);
       setIsFeatured(!!product.isFeatured);
       setIsNewArrival(!!product.isNewArrival);
       setSelectedCategory(product.category || "");
@@ -393,7 +399,9 @@ const EditProduct = () => {
       isNewArrival,
       variants: variants.map(variant => ({
         ...variant,
-        sku: variant.sku || generateSKU(productData.slug, variant.color, variant.size),
+        sku: variant.sku || generateSKU(productData.slug, variant.color[0] || '#000000', variant.size[0] || ''),
+        color: variant.color?.filter(color => color.trim() !== "") || ["#000000"],
+        size: variant.size?.filter(size => size.trim() !== "") || [""],
         specification: variant.specification?.filter(spec => spec.key.trim() !== "" && spec.value.trim() !== "") || []
       })),
       deliveryCharges: deliveryCharges.filter(charge => charge.division && charge.district),
@@ -932,18 +940,52 @@ const EditProduct = () => {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-navy-blue mb-2">Size</label>
-                          <input
-                            type="text"
-                            placeholder="Size (e.g., M, L, XL)"
-                            value={variant.size || ''}
-                            onChange={(e) => {
-                              const newVariants = [...variants];
-                              newVariants[index].size = e.target.value;
-                              setVariants(newVariants);
-                            }}
-                            className="w-full p-3 border border-gray-200 rounded-lg bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
-                          />
+                          <label className="block text-sm font-medium text-navy-blue mb-2">Sizes</label>
+                          <div className="space-y-2">
+                            {(Array.isArray(variant.size) ? variant.size : [variant.size || ""]).map((size, sizeIndex) => (
+                              <div key={sizeIndex} className="flex gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Size (e.g., M, L, XL)"
+                                  value={size}
+                                  onChange={(e) => {
+                                    const newVariants = [...variants];
+                                    const currentSizes = Array.isArray(newVariants[index].size) ? [...newVariants[index].size] : [newVariants[index].size || ""];
+                                    currentSizes[sizeIndex] = e.target.value;
+                                    newVariants[index].size = currentSizes;
+                                    setVariants(newVariants);
+                                  }}
+                                  className="flex-1 p-3 border border-gray-200 rounded-lg bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newVariants = [...variants];
+                                    const currentSizes = Array.isArray(newVariants[index].size) ? [...newVariants[index].size] : [newVariants[index].size || ""];
+                                    const newSizes = currentSizes.filter((_, i) => i !== sizeIndex);
+                                    newVariants[index].size = newSizes.length ? newSizes : [""];
+                                    setVariants(newVariants);
+                                  }}
+                                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newVariants = [...variants];
+                                const currentSizes = Array.isArray(newVariants[index].size) ? [...newVariants[index].size] : [newVariants[index].size || ""];
+                                currentSizes.push("");
+                                newVariants[index].size = currentSizes;
+                                setVariants(newVariants);
+                              }}
+                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                            >
+                              + Add Size
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -957,10 +999,12 @@ const EditProduct = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white p-4 rounded-lg border border-gray-200">
                           <HexColorPicker
-                            color={variant.color || "#ff0000"}
+                            color={Array.isArray(variant.color) ? variant.color[0] || "#ff0000" : variant.color || "#ff0000"}
                             onChange={(color) => {
                               const newVariants = [...variants];
-                              newVariants[index].color = color;
+                              const currentColors = Array.isArray(newVariants[index].color) ? [...newVariants[index].color] : [newVariants[index].color || "#000000"];
+                              currentColors[0] = color;
+                              newVariants[index].color = currentColors;
                               setVariants(newVariants);
                             }}
                             className="w-full rounded-lg shadow-sm"
@@ -968,23 +1012,57 @@ const EditProduct = () => {
                         </div>
                         <div className="flex flex-col gap-3">
                           <div>
-                            <label className="block text-sm font-medium text-navy-blue mb-2">Color Code</label>
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="text"
-                                value={variant.color || ""}
-                                onChange={(e) => {
+                            <label className="block text-sm font-medium text-navy-blue mb-2">Colors</label>
+                            <div className="space-y-2">
+                              {(Array.isArray(variant.color) ? variant.color : [variant.color || "#000000"]).map((color, colorIndex) => (
+                                <div key={colorIndex} className="flex items-center gap-3">
+                                  <input
+                                    type="text"
+                                    value={color}
+                                    onChange={(e) => {
+                                      const newVariants = [...variants];
+                                      const currentColors = Array.isArray(newVariants[index].color) ? [...newVariants[index].color] : [newVariants[index].color || "#000000"];
+                                      currentColors[colorIndex] = e.target.value;
+                                      newVariants[index].color = currentColors;
+                                      setVariants(newVariants);
+                                    }}
+                                    className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
+                                    placeholder="#ffffff"
+                                  />
+                                  <div
+                                    className="w-8 h-8 rounded-lg border-2 border-gray-200 shadow-sm"
+                                    style={{ backgroundColor: color || "#ffffff" }}
+                                  ></div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const newVariants = [...variants];
+                                      const currentColors = Array.isArray(newVariants[index].color) ? [...newVariants[index].color] : [newVariants[index].color || "#000000"];
+                                      const newColors = currentColors.filter((_, i) => i !== colorIndex);
+                                      newVariants[index].color = newColors.length ? newColors : ["#000000"];
+                                      setVariants(newVariants);
+                                    }}
+                                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'];
                                   const newVariants = [...variants];
-                                  newVariants[index].color = e.target.value;
+                                  const currentColors = Array.isArray(newVariants[index].color) ? [...newVariants[index].color] : [newVariants[index].color || "#000000"];
+                                  const newColor = colors.find(c => !currentColors.includes(c)) || `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+                                  currentColors.push(newColor);
+                                  newVariants[index].color = currentColors;
                                   setVariants(newVariants);
                                 }}
-                                className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
-                                placeholder="#ffffff"
-                              />
-                              <div
-                                className="w-12 h-10 rounded-lg border-2 border-gray-200 shadow-sm"
-                                style={{ backgroundColor: variant.color || "#ffffff" }}
-                              ></div>
+                                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                              >
+                                + Add Color
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -1280,8 +1358,8 @@ const EditProduct = () => {
                   onClick={() => {
                     const newVariant: Variant = {
                       sku: generateSKU(productData.slug || 'product', '#000000', 'default'),
-                      color: "#000000",
-                      size: "",
+                      color: ["#000000"],
+                      size: [""],
                       stock: 0,
                       price: productData.price || 0,
                       images: [],

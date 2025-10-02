@@ -408,7 +408,9 @@ const OrderHistory: React.FC = () => {
                       <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                         {item.size && (
                           <div>
-                            Size: <span className="font-semibold uppercase">{item.size}</span>
+                            Size: <span className="font-semibold uppercase">
+                              {Array.isArray(item.size) ? item.size[0] : item.size}
+                            </span>
                           </div>
                         )}
                         {item.color && (
@@ -416,9 +418,12 @@ const OrderHistory: React.FC = () => {
                             <span>Color:</span>
                             <div 
                               className="w-4 h-4 rounded-full border border-gray-300"
-                              style={{ backgroundColor: item.color as string }}
-                              title={item.color as string}
+                              style={{ backgroundColor: Array.isArray(item.color) ? item.color[0] : item.color as string }}
+                              title={Array.isArray(item.color) ? item.color[0] : item.color as string}
                             ></div>
+                            <span className="text-xs">
+                              {Array.isArray(item.color) ? item.color[0] : item.color}
+                            </span>
                           </div>
                         )}
                       </div>

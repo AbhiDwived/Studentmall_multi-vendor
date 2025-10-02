@@ -348,18 +348,36 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
   }, [product?.data?.longDescription, uiState.showFullDescription]);
 
   const validateVariantSelection = useCallback(() => {
-    if (!product.data.variants) return { isValid: true };
+    if (!product.data.variants || product.data.variants.length === 0) return { isValid: true };
     
-    if (product.data.variants.some(v => v.color) && !variantState.selected?.color) {
-      return { isValid: false, message: "Please select color." };
+    // Check if any variants have colors and user hasn't selected one
+    const hasColorVariants = product.data.variants.some(v => 
+      (Array.isArray(v.color) && v.color.length > 0) || 
+      (typeof v.color === 'string' && v.color.trim() !== '')
+    );
+    
+    if (hasColorVariants && !variantState.selected?.color) {
+      return { isValid: false, message: "Please select a color for this product." };
     }
     
-    if (product.data.variants.some(v => v.size) && !variantState.selected?.size) {
-      return { isValid: false, message: "Please select size." };
+    // Check if any variants have sizes and user hasn't selected one
+    const hasSizeVariants = product.data.variants.some(v => 
+      (Array.isArray(v.size) && v.size.length > 0) || 
+      (typeof v.size === 'string' && v.size.trim() !== '')
+    );
+    
+    if (hasSizeVariants && !variantState.selected?.size) {
+      return { isValid: false, message: "Please select a size for this product." };
+    }
+    
+    // Check if innerSlug selection is required
+    const hasInnerSlugVariants = product.data.variants.some(v => v.innerSlug);
+    if (hasInnerSlugVariants && !variantState.innerSlug) {
+      return { isValid: false, message: "Please select a variant option." };
     }
     
     return { isValid: true };
-  }, [product.data.variants, variantState.selected]);
+  }, [product.data.variants, variantState.selected, variantState.innerSlug]);
 
   // Memoized calculations
   const allImages = useMemo(() => {
@@ -742,14 +760,34 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
     }
 
     const cart = safeJsonParse(localStorage.getItem("cart") || "[]");
-    const existingCartItem = cart.find((item: any) =>
-      item.productId === product.data._id &&
-      item.userId === auth.user._id &&
-      item.color === dynamicProductDetails.color &&
-      item.size === dynamicProductDetails.size &&
-      item.innerSlug === variantState.innerSlug &&
-      item.innerSubSlug === variantState.innerSubSlug
+    const selectedColor = variantState.selected?.color || dynamicProductDetails.color;
+    const selectedSize = variantState.selected?.size || dynamicProductDetails.size;
+    
+    // Create a unique variant identifier for better duplicate detection
+    const createVariantKey = (productId: string, userId: string, color: string, size: string, innerSlug: string, innerSubSlug: string) => {
+      return `${productId}-${userId}-${color || 'no-color'}-${size || 'no-size'}-${innerSlug || 'no-slug'}-${innerSubSlug || 'no-subslug'}`;
+    };
+    
+    const currentVariantKey = createVariantKey(
+      product.data._id,
+      auth.user._id,
+      selectedColor,
+      selectedSize,
+      variantState.innerSlug,
+      variantState.innerSubSlug
     );
+    
+    const existingCartItem = cart.find((item: any) => {
+      const itemVariantKey = createVariantKey(
+        item.productId,
+        item.userId,
+        item.color,
+        item.size,
+        item.innerSlug,
+        item.innerSubSlug
+      );
+      return itemVariantKey === currentVariantKey;
+    });
 
     if (existingCartItem) {
       toast.error("This product with selected variant is already in your cart.");
@@ -757,7 +795,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       return;
     }
 
-    const totalPrice = variantState.price ?? product.data.discountPrice ?? product.data.price;
+    const totalPrice = variantState.price ?? dynamicProductDetails.finalPrice ?? product.data.discountPrice ?? product.data.price;
     const stockQuantityToUse = variantState.stock ?? product.data.stockQuantity;
 
     const cartItem = {
@@ -770,8 +808,8 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       sellerName: product?.data?.sellerName,
       stockQuantity: stockQuantityToUse,
       productImages: dynamicProductDetails.images,
-      color: dynamicProductDetails.color,
-      size: dynamicProductDetails.size,
+      color: selectedColor,
+      size: selectedSize,
       sku: dynamicProductDetails.sku,
       innerSlug: variantState.innerSlug,
       innerSubSlug: variantState.innerSubSlug,
@@ -800,8 +838,10 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       return;
     }
 
-    const priceToUse = variantState.price ?? product.data.discountPrice ?? product.data.price;
+    const priceToUse = variantState.price ?? dynamicProductDetails.finalPrice ?? product.data.discountPrice ?? product.data.price;
     const stockToUse = variantState.stock ?? product.data.stockQuantity;
+    const selectedColor = variantState.selected?.color || dynamicProductDetails.color;
+    const selectedSize = variantState.selected?.size || dynamicProductDetails.size;
 
     const cartItem = {
       userId: auth.user._id,
@@ -813,22 +853,40 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
       sellerName: product?.data?.sellerName,
       stockQuantity: stockToUse,
       productImages: dynamicProductDetails.images,
-      color: dynamicProductDetails.color,
-      size: dynamicProductDetails.size,
+      color: selectedColor,
+      size: selectedSize,
       sku: dynamicProductDetails.sku,
       innerSlug: variantState.innerSlug,
       innerSubSlug: variantState.innerSubSlug,
     };
 
     const cart = safeJsonParse(localStorage.getItem("cart") || "[]");
-    const existingCartItem = cart.find((item: any) =>
-      item.productId === product.data._id &&
-      item.userId === auth.user._id &&
-      item.color === dynamicProductDetails.color &&
-      item.size === dynamicProductDetails.size &&
-      item.innerSlug === variantState.innerSlug &&
-      item.innerSubSlug === variantState.innerSubSlug
+    
+    // Create a unique variant identifier for better duplicate detection
+    const createVariantKey = (productId: string, userId: string, color: string, size: string, innerSlug: string, innerSubSlug: string) => {
+      return `${productId}-${userId}-${color || 'no-color'}-${size || 'no-size'}-${innerSlug || 'no-slug'}-${innerSubSlug || 'no-subslug'}`;
+    };
+    
+    const currentVariantKey = createVariantKey(
+      product.data._id,
+      auth.user._id,
+      selectedColor,
+      selectedSize,
+      variantState.innerSlug,
+      variantState.innerSubSlug
     );
+    
+    const existingCartItem = cart.find((item: any) => {
+      const itemVariantKey = createVariantKey(
+        item.productId,
+        item.userId,
+        item.color,
+        item.size,
+        item.innerSlug,
+        item.innerSubSlug
+      );
+      return itemVariantKey === currentVariantKey;
+    });
 
     if (!existingCartItem) {
       cart.push(cartItem);
@@ -1336,66 +1394,76 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product, relatedProduct
                         </div>
                       )}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Color Options - only show if current variant selection has colors */}
+                        {/* Color Options - show all colors from arrays */}
                         {product.data.variants && (() => {
                           const availableVariants = variantState.innerSlug 
                             ? product.data.variants.filter(v => v.innerSlug === variantState.innerSlug && (!variantState.innerSubSlug || v.innerSubSlug === variantState.innerSubSlug))
                             : product.data.variants;
-                          const hasColors = availableVariants.some(v => v.color);
                           
-                          return hasColors && (
+                          // Get all unique colors from all variants (both single color and color arrays)
+                          const allColors = new Set<string>();
+                          availableVariants.forEach(variant => {
+                            if (Array.isArray(variant.color)) {
+                              variant.color.forEach(color => color && allColors.add(color));
+                            } else if (variant.color) {
+                              allColors.add(variant.color);
+                            }
+                          });
+                          
+                          return allColors.size > 0 && (
                             <div>
                               <h5 className="font-semibold mb-2">Color</h5>
                               <div className="flex flex-wrap gap-2">
-                                {availableVariants
-                                  .filter((variant, index, self) => 
-                                    variant.color && index === self.findIndex(t => t.color === variant.color)
-                                  )
-                                  .map((variant, index) => (
-                                    <label
-                                      key={index}
-                                      className={`cursor-pointer w-8 h-8 border rounded-full transition-all ${
-                                        variantState.selected?.color === variant.color
-                                          ? "border-orange-600 ring-2 ring-orange-500"
-                                          : "border-gray-300 hover:ring-1 hover:ring-orange-200"
-                                      }`}
-                                      style={{ backgroundColor: variant.color }}
-                                      onClick={() => variant.color && handleVariantChange("color", variant.color)}
-                                    />
-                                  ))}
+                                {Array.from(allColors).map((color, index) => (
+                                  <label
+                                    key={index}
+                                    className={`cursor-pointer w-8 h-8 border rounded-full transition-all ${
+                                      variantState.selected?.color === color
+                                        ? "border-orange-600 ring-2 ring-orange-500"
+                                        : "border-gray-300 hover:ring-1 hover:ring-orange-200"
+                                    }`}
+                                    style={{ backgroundColor: color }}
+                                    onClick={() => handleVariantChange("color", color)}
+                                  />
+                                ))}
                               </div>
                             </div>
                           );
                         })()}
 
-                        {/* Size Options - only show if current variant selection has sizes */}
+                        {/* Size Options - show all sizes from arrays */}
                         {product.data.variants && (() => {
                           const availableVariants = variantState.innerSlug 
                             ? product.data.variants.filter(v => v.innerSlug === variantState.innerSlug && (!variantState.innerSubSlug || v.innerSubSlug === variantState.innerSubSlug))
                             : product.data.variants;
-                          const hasSizes = availableVariants.some(v => v.size);
                           
-                          return hasSizes && (
+                          // Get all unique sizes from all variants (both single size and size arrays)
+                          const allSizes = new Set<string>();
+                          availableVariants.forEach(variant => {
+                            if (Array.isArray(variant.size)) {
+                              variant.size.forEach(size => size && allSizes.add(size));
+                            } else if (variant.size) {
+                              allSizes.add(variant.size);
+                            }
+                          });
+                          
+                          return allSizes.size > 0 && (
                             <div>
                               <h5 className="font-semibold mb-2">Size</h5>
                               <div className="flex flex-wrap gap-2">
-                                {availableVariants
-                                  .filter((variant, index, self) => 
-                                    variant.size && index === self.findIndex(t => t.size === variant.size)
-                                  )
-                                  .map((variant, index) => (
-                                    <label
-                                      key={index}
-                                      className={`cursor-pointer px-3 py-1 border rounded transition-all ${
-                                        variantState.selected?.size === variant.size
-                                          ? "bg-orange-600 text-white border-orange-600"
-                                          : "border-gray-300 hover:bg-orange-100"
-                                      }`}
-                                      onClick={() => variant.size && handleVariantChange("size", variant.size)}
-                                    >
-                                      {variant.size}
-                                    </label>
-                                  ))}
+                                {Array.from(allSizes).map((size, index) => (
+                                  <label
+                                    key={index}
+                                    className={`cursor-pointer px-3 py-1 border rounded transition-all ${
+                                      variantState.selected?.size === size
+                                        ? "bg-orange-600 text-white border-orange-600"
+                                        : "border-gray-300 hover:bg-orange-100"
+                                    }`}
+                                    onClick={() => handleVariantChange("size", size)}
+                                  >
+                                    {size}
+                                  </label>
+                                ))}
                               </div>
                             </div>
                           );

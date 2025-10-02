@@ -34,8 +34,8 @@ type CartItem = {
   quantity: number;
   sellerEmail: string;
   sellerName: string;
-  color?: string;
-  size?: string;
+  color?: string | string[];
+  size?: string | string[];
   productImage?: string[];
   productImages: string[];
   innerSlug?: string;
@@ -264,6 +264,11 @@ const CheckoutPage = () => {
     setTotalAmount(total);
   };
 
+  // Recalculate total when cart items change
+  useEffect(() => {
+    calculateTotal(cartItems);
+  }, [cartItems]);
+
   const checkFirstOrder = async (userId: string) => {
     try {
       const response = await axios.post(
@@ -374,8 +379,8 @@ const CheckoutPage = () => {
               price: item.price,
               sellerEmail: item.sellerEmail,
               sellerName: item.sellerName,
-              color: item.color || "",
-              size: item.size || "",
+              color: Array.isArray(item.color) ? item.color[0] : (item.color || ""),
+              size: Array.isArray(item.size) ? item.size[0] : (item.size || ""),
               name: item.name || "",
               productImage: item.productImages || [],
               innerSlug: item.innerSlug || "",
@@ -485,7 +490,7 @@ const CheckoutPage = () => {
     }
   };
 
-  // Fetch products from backend
+  // Fetch products from backend and correct variant prices
   useEffect(() => {
     async function fetchProducts() {
       const productIds = [...new Set(cartItems.map((item) => item.productId))];
@@ -500,6 +505,35 @@ const CheckoutPage = () => {
       );
 
       setFetchedProducts(productsData.filter(Boolean));
+      
+      // Correct cart item prices based on variants
+      const correctedCartItems = cartItems.map(item => {
+        const product = productsData.find(p => p._id === item.productId);
+        if (product?.variants) {
+          let matchingVariant = product.variants.find((v: any) => 
+            v.innerSlug === item.innerSlug && 
+            (!item.innerSubSlug || v.innerSubSlug === item.innerSubSlug)
+          );
+          
+          if (!matchingVariant) {
+            matchingVariant = product.variants.find((v: any) => 
+              v.color === item.color && v.size === item.size
+            );
+          }
+          
+          if (matchingVariant) {
+            const correctPrice = matchingVariant.finalprice || matchingVariant.finalPrice || matchingVariant.price;
+            if (correctPrice && correctPrice !== item.price) {
+              return { ...item, price: correctPrice };
+            }
+          }
+        }
+        return item;
+      });
+      
+      // Update cart items with corrected prices
+      setCartItems(correctedCartItems);
+      localStorage.setItem("cart", JSON.stringify(correctedCartItems));
     }
 
     if (cartItems.length > 0) {
@@ -507,7 +541,7 @@ const CheckoutPage = () => {
     } else {
       setFetchedProducts([]);
     }
-  }, [cartItems]);
+  }, [cartItems.length]);
 
   // Shipping cost calculation
   useEffect(() => {
@@ -837,14 +871,19 @@ const CheckoutPage = () => {
                                 <span>Color:</span>
                                 <div 
                                   className="w-4 h-4 rounded-full border border-gray-300"
-                                  style={{ backgroundColor: item.color }}
-                                  title={item.color}
+                                  style={{ backgroundColor: Array.isArray(item.color) ? item.color[0] : item.color }}
+                                  title={Array.isArray(item.color) ? item.color[0] : item.color}
                                 ></div>
+                                <span className="text-xs">
+                                  {Array.isArray(item.color) ? item.color[0] : item.color}
+                                </span>
                               </div>
                             )}
                             {item.size && (
                               <div>
-                                Size: <span className="uppercase">{item.size}</span>
+                                Size: <span className="uppercase">
+                                  {Array.isArray(item.size) ? item.size[0] : item.size}
+                                </span>
                               </div>
                             )}
                           </div>

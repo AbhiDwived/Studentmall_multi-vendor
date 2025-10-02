@@ -80,8 +80,8 @@ interface ProductData {
 
 interface Variant {
   sku: string;
-  color: string;
-  size: string;
+  color: string[];
+  size: string[];
   stock: number;
   price: number;
   images: string[];
@@ -191,8 +191,8 @@ const AddProduct = () => {
   const addVariant = useCallback(() => {
     const newVariant: Variant = {
       sku: generateSKU(productData.slug || 'product', '#000000', 'default'),
-      color: "#000000",
-      size: "",
+      color: ["#000000"],
+      size: [""],
       stock: 0,
       price: productData.price || 0,
       images: [],
@@ -538,7 +538,9 @@ const AddProduct = () => {
       isNewArrival,
       variants: variants.map(variant => ({
         ...variant,
-        sku: variant.sku || generateSKU(productData.slug, variant.color, variant.size),
+        sku: variant.sku || generateSKU(productData.slug, variant.color[0] || '#000000', variant.size[0] || ''),
+        color: variant.color?.filter(color => color.trim() !== "") || ["#000000"],
+        size: variant.size?.filter(size => size.trim() !== "") || [""],
         specification: variant.specification?.filter(spec => spec.key.trim() !== "" && spec.value.trim() !== "") || []
       })),
       sellerEmail,
@@ -779,19 +781,46 @@ const AddProduct = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-navy-blue mb-2">Size</label>
-                <input
-                  type="text"
-                  placeholder="Size (e.g., M, L, XL)"
-                  value={variant.size}
-                  onChange={(e) => {
-                    updateVariantField(index, "size", e.target.value);
-                    // Auto-update SKU when size changes
-                    const newSku = generateSKU(productData.slug, variant.color, e.target.value);
-                    updateVariantField(index, "sku", newSku);
-                  }}
-                  className="w-full p-3 border border-gray-200 rounded-lg bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
-                />
+                <label className="block text-sm font-medium text-navy-blue mb-2">Sizes</label>
+                <div className="space-y-2">
+                  {(variant.sizes || [""]).map((size, sizeIndex) => (
+                    <div key={sizeIndex} className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Size (e.g., M, L, XL)"
+                        value={size}
+                        onChange={(e) => {
+                          const newSizes = [...(variant.sizes || [])];
+                          newSizes[sizeIndex] = e.target.value;
+                          updateVariantField(index, "sizes", newSizes);
+                          updateVariantField(index, "size", newSizes[0] || "");
+                        }}
+                        className="flex-1 p-3 border border-gray-200 rounded-lg bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newSizes = (variant.sizes || []).filter((_, i) => i !== sizeIndex);
+                          updateVariantField(index, "sizes", newSizes.length ? newSizes : [""]);
+                          updateVariantField(index, "size", newSizes[0] || "");
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newSizes = [...(variant.sizes || []), ""];
+                      updateVariantField(index, "sizes", newSizes);
+                    }}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                  >
+                    + Add Size
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -808,33 +837,62 @@ const AddProduct = () => {
                   color={variant.color || "#ff0000"}
                   onChange={(color) => {
                     updateVariantField(index, "color", color);
-                    // Auto-update SKU when color changes
-                    const newSku = generateSKU(productData.slug, color, variant.size);
-                    updateVariantField(index, "sku", newSku);
+                    const newColors = [...(variant.colors || [])];
+                    if (newColors.length === 0) newColors.push(color);
+                    else newColors[0] = color;
+                    updateVariantField(index, "colors", newColors);
                   }}
                   className="w-full rounded-lg shadow-sm"
                 />
               </div>
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-navy-blue mb-2">Color Code</label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="text"
-                      value={variant.color || ""}
-                      onChange={(e) => {
-                        updateVariantField(index, "color", e.target.value);
-                        // Auto-update SKU when color changes
-                        const newSku = generateSKU(productData.slug, e.target.value, variant.size);
-                        updateVariantField(index, "sku", newSku);
+                  <label className="block text-sm font-medium text-navy-blue mb-2">Colors</label>
+                  <div className="space-y-2">
+                    {(variant.colors || ["#000000"]).map((color, colorIndex) => (
+                      <div key={colorIndex} className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          value={color}
+                          onChange={(e) => {
+                            const newColors = [...(variant.colors || [])];
+                            newColors[colorIndex] = e.target.value;
+                            updateVariantField(index, "colors", newColors);
+                            updateVariantField(index, "color", newColors[0] || "");
+                          }}
+                          className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
+                          placeholder="#ffffff"
+                        />
+                        <div
+                          className="w-8 h-8 rounded-lg border-2 border-gray-200 shadow-sm"
+                          style={{ backgroundColor: color || "#ffffff" }}
+                        ></div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newColors = (variant.colors || []).filter((_, i) => i !== colorIndex);
+                            updateVariantField(index, "colors", newColors.length ? newColors : ["#000000"]);
+                            updateVariantField(index, "color", newColors[0] || "#000000");
+                          }}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#FFC0CB', '#A52A2A'];
+                        const existingColors = variant.colors || [];
+                        const newColor = colors.find(c => !existingColors.includes(c)) || `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+                        const newColors = [...existingColors, newColor];
+                        updateVariantField(index, "colors", newColors);
                       }}
-                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm flex-1 bg-white text-navy-blue focus:outline-none focus:ring-2 focus:ring-accent-orange focus:border-accent-orange transition-all duration-200"
-                      placeholder="#ffffff"
-                    />
-                    <div
-                      className="w-12 h-10 rounded-lg border-2 border-gray-200 shadow-sm"
-                      style={{ backgroundColor: variant.color || "#ffffff" }}
-                    ></div>
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm"
+                    >
+                      + Add Color
+                    </button>
                   </div>
                 </div>
               </div>

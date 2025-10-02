@@ -45,8 +45,8 @@ export type TProduct = {
 	variants?: Array<{
 		innerSlug?: string;
 		innerSubSlug?: string;
-		color: string;
-		size: string;
+		color: string[]; // Multiple colors as array
+		size: string[]; // Multiple sizes as array
 		baseprice: number;
 		discount?: number;
 		finalprice: number;
