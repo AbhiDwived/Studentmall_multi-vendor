@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   Home,
   ShoppingCart,
@@ -21,13 +22,29 @@ import {
   faInstagram,
 } from "@fortawesome/free-brands-svg-icons";
 const FooterClientLinks = () => {
+  const [openSections, setOpenSections] = useState<{[key: string]: boolean}>({});
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
   return (
     <>
       {/* Customer Service */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 footer-heading">Customer Service</h3>
+        <h3 
+          className="text-lg font-semibold mb-4 footer-heading md:cursor-default cursor-pointer flex items-center justify-between md:justify-start"
+          onClick={() => toggleSection('customerService')}
+        >
+          Customer Service
+          <span className="md:hidden text-xl">
+            {openSections.customerService ? '-' : '+'}
+          </span>
+        </h3>
 
-        <ul className="space-y-2 text-sm">
+        <ul className={`space-y-2 text-sm md:block ${openSections.customerService ? 'block' : 'hidden'}`}>
           <li>
             <Link
               href="/contact"
@@ -91,8 +108,16 @@ const FooterClientLinks = () => {
 
       {/* Quick Links */}
       <div>
-        <h3 className="text-lg font-semibold mb-4 footer-heading">Quick Links</h3>
-        <ul className="space-y-2 text-sm">
+        <h3 
+          className="text-lg font-semibold mb-4 footer-heading md:cursor-default cursor-pointer flex items-center justify-between md:justify-start"
+          onClick={() => toggleSection('quickLinks')}
+        >
+          Quick Links
+          <span className="md:hidden text-xl">
+            {openSections.quickLinks ? '-' : '+'}
+          </span>
+        </h3>
+        <ul className={`space-y-2 text-sm md:block ${openSections.quickLinks ? 'block' : 'hidden'}`}>
           <li>
             <Link href="/" className="flex items-center gap-2 hover:underline">
               <Home className="w-4 h-4" /> Home
@@ -117,11 +142,21 @@ const FooterClientLinks = () => {
         </ul>
       </div>
       <div>
-        <h3 className="text-lg font-semibold mb-4 footer-heading">Get in Touch</h3>
-        <p className="text-sm mb-2">📞 +91 8433208146</p>
-        <p className="text-sm mb-4">✉️ abhidwivedi687@gmail.com</p>
+        <h3 
+          className="text-lg font-semibold mb-4 footer-heading md:cursor-default cursor-pointer flex items-center justify-between md:justify-start"
+          onClick={() => toggleSection('getInTouch')}
+        >
+          Get in Touch
+          <span className="md:hidden text-xl">
+            {openSections.getInTouch ? '-' : '+'}
+          </span>
+        </h3>
+        <div className={`md:block ${openSections.getInTouch ? 'block' : 'hidden'}`}>
+          <p className="text-sm mb-2">📞 +91 8433208146</p>
+          <p className="text-sm mb-4">✉️ abhidwivedi687@gmail.com</p>
 
-        <SellerClientButton />
+          <SellerClientButton />
+        </div>
       </div>
       {/* Social Icons */}
       <div className="flex gap-4 mt-4">

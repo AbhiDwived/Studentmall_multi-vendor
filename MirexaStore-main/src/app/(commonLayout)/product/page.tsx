@@ -49,23 +49,23 @@ const Product = () => {
     <div>
       {/* New Arrivals Section */}
       <section>
-        <h2 className="text-3xl pt-7 font-semibold text-center mb-8 text-gray-800">
+        <h2 className="text-3xl pt-2 sm:pt-7 font-semibold text-center mb-2 sm:mb-8 text-gray-800">
           New Arrivals
         </h2>
         <ProductCart products={newArrivalProducts} />
       </section>
 
       {/* Featured Products Section */}
-      <section>
-        <h2 className="text-3xl font-semibold text-center mb-8 text-gray-800">
+      <section className="mt-2 sm:mt-8">
+        <h2 className="text-3xl font-semibold text-center mb-2 sm:mb-8 text-gray-800">
           Featured Products
         </h2>
         <ProductCart products={featuredProducts} />
       </section>
 
       {/* All Products Section */}
-      <section>
-        <h2 className="text-3xl font-semibold text-center mb-8 text-gray-800">
+      <section className="mt-2 sm:mt-8">
+        <h2 className="text-3xl font-semibold text-center mb-2 sm:mb-8 text-gray-800">
           All Products
         </h2>
         <ProductCart products={products} />

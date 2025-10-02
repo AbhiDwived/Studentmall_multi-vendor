@@ -56,8 +56,8 @@ export default function CategorySection({ categories }: Props) {
   };
 
   return (
-    <section className="w-full py-12 px-2 sm:px-4">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 text-center">
+    <section className="w-full py-6 sm:py-12 px-2 sm:px-4">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-8 text-center">
         🛒 Browse Categories
       </h2>
 
@@ -73,11 +73,11 @@ export default function CategorySection({ categories }: Props) {
           {duplicatedCategories.map((category, index) => (
             <div
               key={`${category._id}-${index}`}
-              className="flex-shrink-0 w-1/3 sm:w-1/4 md:w-1/5 lg:w-1/6 px-0.5 cursor-pointer"
+              className="flex-shrink-0 w-1/5 sm:w-1/4 md:w-1/5 lg:w-1/6 px-0.5 cursor-pointer"
               onClick={() => handleCategoryClick(category.slug)}
             >
-              <div className="group border rounded-lg bg-white shadow-sm hover:shadow-md transition flex flex-col items-center text-center p-2">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative rounded-md overflow-hidden bg-gray-100">
+              <div className="group border rounded-lg bg-white shadow-sm hover:shadow-md transition flex flex-col items-center text-center p-1 sm:p-2">
+                <div className="w-12 h-12 sm:w-20 sm:h-20 md:w-24 md:h-24 relative rounded-md overflow-hidden bg-gray-100">
                   <Image
                     src={category.bannerImage || "https://via.placeholder.com/100x100?text=Category"}
                     alt={category.name}
@@ -90,7 +90,7 @@ export default function CategorySection({ categories }: Props) {
                     }}
                   />
                 </div>
-                <h3 className="mt-2 text-xs sm:text-sm font-medium text-gray-800 group-hover:text-[#F6550C] transition">
+                <h3 className="mt-1 text-[10px] sm:text-sm font-medium text-gray-800 group-hover:text-[#F6550C] transition truncate w-full max-w-full overflow-hidden">
                   {category.name}
                 </h3>
               </div>

@@ -180,8 +180,8 @@ const ProductCart = ({ products }: ProductCartProps) => {
           ))}
         </div>
       ) : (
-        <main className="w-full px-2 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 lg:gap-4">
+        <main className="w-full px-2 py-2 sm:py-8">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2 lg:gap-4">
             {currentProducts.length > 0 ? (
               currentProducts.map((product) => {
                 const discountPercentage = calculateDiscountPercentage(
@@ -205,7 +205,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
                     onClick={() => handleSeeDetails(product)}
                   >
                     {/* Image Area */}
-                    <div className="relative w-full h-44 bg-white flex items-center justify-center">
+                    <div className="relative w-full h-24 sm:h-44 bg-white flex items-center justify-center">
                       {discountPercentage > 0 && (
                         <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-md z-10">
                           {discountPercentage}% OFF
@@ -213,7 +213,7 @@ const ProductCart = ({ products }: ProductCartProps) => {
                       )}
 
                       {product.productImages?.length > 0 ? (
-                        <div className="relative w-[180px] h-[200px]">
+                        <div className="relative w-[80px] h-[85px] sm:w-[180px] sm:h-[200px]">
                           <Image
                             src={product.productImages[0]}
                             alt={product.name}
@@ -237,8 +237,8 @@ const ProductCart = ({ products }: ProductCartProps) => {
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-4 space-y-1">
-                      <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
+                    <div className="p-2 sm:p-4 space-y-1">
+                      <h3 className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
                         {product.name}
                       </h3>
 
